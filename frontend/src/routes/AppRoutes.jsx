@@ -1,4 +1,10 @@
+import LoginPage from "../pages/auth/LoginPage";
+import RegisterPage from "../pages/auth/RegisterPage";
+import CatalogPage from "../pages/public/CatalogPage";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomePage from "../pages/public/HomePage";
+import BookDetailPage from "../pages/public/BookDetailPage";
+import CartPage from "../pages/public/CartPage";
 
 function Placeholder({ title }) {
   return (
@@ -19,13 +25,13 @@ export default function AppRoutes() {
     <BrowserRouter>
       <Routes>
         {/* Tienda online */}
-        <Route path="/" element={<Placeholder title="Inicio - Biblioteca" />} />
-        <Route path="/catalogo" element={<Placeholder title="Catálogo de libros" />} />
-        <Route path="/carrito" element={<Placeholder title="Carrito de compras" />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/catalogo" element={<CatalogPage />} />
+        <Route path="/carrito" element={<CartPage />} />
 
         {/* Autenticación */}
-        <Route path="/login" element={<Placeholder title="Iniciar sesión" />} />
-        <Route path="/registro" element={<Placeholder title="Crear cuenta" />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/registro" element={<RegisterPage />} />
 
         {/* Clientes */}
         <Route path="/mi-cuenta" element={<Placeholder title="Mi cuenta" />} />
@@ -42,6 +48,7 @@ export default function AppRoutes() {
 
         {/* Página no encontrada */}
         <Route path="*" element={<Placeholder title="Página no encontrada" />} />
+        <Route path="/libro/:id" element={<BookDetailPage />} />
       </Routes>
     </BrowserRouter>
   );
