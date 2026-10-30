@@ -134,14 +134,12 @@ export default function CartPage() {
                 <span>S/ {totalPrice.toFixed(2)}</span>
               </div>
 
-              <button
-                type="button"
-                disabled
-                title="El checkout se implementará después"
-                className="mt-6 w-full cursor-not-allowed rounded-xl bg-[#3D7669] py-3 font-semibold text-white opacity-50"
-              >
-                Finalizar compra (próximamente)
-              </button>
+              <Link
+  to="/checkout"
+  className="mt-6 block w-full rounded-xl bg-[#3D7669] py-3 text-center font-semibold text-white transition hover:bg-[#254E46]"
+>
+  Finalizar compra
+</Link>
 
               <button
                 type="button"

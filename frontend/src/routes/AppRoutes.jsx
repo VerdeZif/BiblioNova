@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "../pages/public/HomePage";
 import BookDetailPage from "../pages/public/BookDetailPage";
 import CartPage from "../pages/public/CartPage";
+import CheckoutPage from "../pages/public/CheckoutPage";
 
 function Placeholder({ title }) {
   return (
@@ -28,7 +29,7 @@ export default function AppRoutes() {
         <Route path="/" element={<HomePage />} />
         <Route path="/catalogo" element={<CatalogPage />} />
         <Route path="/carrito" element={<CartPage />} />
-
+        <Route path="/checkout" element={<CheckoutPage />} />
         {/* Autenticación */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
