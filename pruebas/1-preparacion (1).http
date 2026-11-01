@@ -1,0 +1,425 @@
+# =====================================================================
+# BIBLIONOVA - PRUEBAS 4A  |  FASE 1 de 2  (Run all requests in file)
+# =====================================================================
+# Antes de ejecutar:
+#   1) Ajusta @staffUser / @staffPass (usuario de PERSONAL/ADMIN).
+#   2) Deja foto.jpg en la misma carpeta que estos .http (lo usa la fase 2).
+#   3) Esta fase crea su propia data (política, libros, ejemplares,
+#      lectores y 3 clientes). Cada corrida usa un sufijo nuevo.
+#   4) Al terminar, el ULTIMO request imprime 2 sentencias SQL con los ids
+#      reales. Ejecútalas en MySQL y luego corre 2-verificacion.http
+# NOTA: crea y ACTIVA una política nueva (tarifa S/ 1.00 por día).
+# =====================================================================
+
+@host = http://localhost:8080
+@staffUser = admin
+@staffPass = AdminBiblio2026!
+
+### 00 Login personal
+< {%
+client.global.set("sfx", Date.now().toString());
+%}
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{"usuario":"{{staffUser}}","contrasena":"{{staffPass}}"}
+
+> {%
+client.test("login personal 200", function () { client.assert(response.status === 200, "status " + response.status); });
+client.global.set("tokenStaff", response.body.token);
+%}
+
+### 01 Política de prueba (S/ 1.00 por día, 7 días, máx 5 ejemplares)
+POST {{host}}/api/prestamos/politicas
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"nombre":"Pruebas {{sfx}}","diasPrestamo":7,"maxEjemplares":5,"tarifaRetrasoDiaria":1.00,"maxMultaRetraso":50.00}
+
+> {%
+client.test("política creada", function () { client.assert(response.status === 201, "status " + response.status); });
+client.global.set("politicaId", response.body.politicaId);
+%}
+
+### 02 Activar política
+POST {{host}}/api/prestamos/politicas/{{politicaId}}/activar
+Authorization: Bearer {{tokenStaff}}
+
+> {%
+client.test("política activa", function () { client.assert(response.status === 200 && response.body.activa === true, "status " + response.status); });
+%}
+
+### 03 Autor
+POST {{host}}/api/catalogo/autores
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"nombres":"Autor","apellidos":"Pruebas {{sfx}}"}
+
+> {%
+client.test("autor creado", function () { client.assert(response.status === 201, "status " + response.status); });
+client.global.set("autorId", response.body.autorId);
+%}
+
+### 04 Libro para MULTAS
+POST {{host}}/api/catalogo/libros
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"titulo":"Libro Multas {{sfx}}","autorIds":[{{autorId}}],"precioVenta":10.00,"prestamoHabilitado":true,"ventaHabilitada":false}
+
+> {%
+client.test("libro multas creado", function () { client.assert(response.status === 201, "status " + response.status); });
+client.global.set("libroM", response.body.libroId);
+%}
+
+### 05 Libro para RESERVAS (tendrá un solo ejemplar)
+POST {{host}}/api/catalogo/libros
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"titulo":"Libro Reservas {{sfx}}","autorIds":[{{autorId}}],"precioVenta":10.00,"prestamoHabilitado":true,"ventaHabilitada":false}
+
+> {%
+client.test("libro reservas creado", function () { client.assert(response.status === 201, "status " + response.status); });
+client.global.set("libroR", response.body.libroId);
+%}
+
+### 06 Recepción: 5 ejemplares del libro de multas
+POST {{host}}/api/inventario/recepciones
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"tipoOrigen":"Donacion","donante":"Pruebas","lineas":[{"libroId":{{libroM}},"cantidad":5,"costoUnitario":0,"esVendible":false,"esPrestamo":true,"condicionFisica":"Bueno"}]}
+
+> {%
+client.test("5 ejemplares", function () {
+  client.assert(response.status === 201, "status " + response.status);
+  client.assert(response.body.lineas[0].ejemplares.length === 5, "cantidad de ejemplares");
+});
+const e = response.body.lineas[0].ejemplares;
+client.global.set("c1", e[0]); client.global.set("c2", e[1]); client.global.set("c3", e[2]);
+%}
+
+### 07 Recepción: 1 ejemplar del libro de reservas
+POST {{host}}/api/inventario/recepciones
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"tipoOrigen":"Donacion","donante":"Pruebas","lineas":[{"libroId":{{libroR}},"cantidad":1,"costoUnitario":0,"esVendible":false,"esPrestamo":true,"condicionFisica":"Bueno"}]}
+
+> {%
+client.test("1 ejemplar", function () { client.assert(response.status === 201, "status " + response.status); });
+client.global.set("codR", response.body.lineas[0].ejemplares[0]);
+%}
+
+### 08 Lector M (multas)
+POST {{host}}/api/prestamos/lectores
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"documento":"M{{sfx}}","nombres":"Lector","apellidos":"Multas"}
+
+> {%
+client.test("lector M", function () { client.assert(response.status === 201, "status " + response.status); });
+client.global.set("lectorM", response.body.lectorId);
+%}
+
+### 09 Lector M2 (multa de daño para anular)
+POST {{host}}/api/prestamos/lectores
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"documento":"N{{sfx}}","nombres":"Lector","apellidos":"Multas Dos"}
+
+> {%
+client.test("lector M2", function () { client.assert(response.status === 201, "status " + response.status); });
+client.global.set("lectorM2", response.body.lectorId);
+%}
+
+### 10 Registro cliente A
+POST {{host}}/api/auth/registro
+Content-Type: application/json
+
+{"nombreUsuario":"cliA{{sfx}}","contrasena":"Clave12345","correo":"cliA{{sfx}}@test.com","documento":"A{{sfx}}","nombres":"Cliente","apellidos":"A"}
+
+> {%
+client.test("registro A", function () { client.assert(response.status === 201, "status " + response.status); });
+client.global.set("lectorA", response.body.lectorId);
+%}
+
+### 11 Registro cliente B
+POST {{host}}/api/auth/registro
+Content-Type: application/json
+
+{"nombreUsuario":"cliB{{sfx}}","contrasena":"Clave12345","correo":"cliB{{sfx}}@test.com","documento":"B{{sfx}}","nombres":"Cliente","apellidos":"B"}
+
+> {%
+client.test("registro B", function () { client.assert(response.status === 201, "status " + response.status); });
+client.global.set("lectorB", response.body.lectorId);
+%}
+
+### 12 Registro cliente C
+POST {{host}}/api/auth/registro
+Content-Type: application/json
+
+{"nombreUsuario":"cliC{{sfx}}","contrasena":"Clave12345","correo":"cliC{{sfx}}@test.com","documento":"C{{sfx}}","nombres":"Cliente","apellidos":"C"}
+
+> {%
+client.test("registro C", function () { client.assert(response.status === 201, "status " + response.status); });
+client.global.set("lectorC", response.body.lectorId);
+%}
+
+### 13 Login A
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{"usuario":"cliA{{sfx}}","contrasena":"Clave12345"}
+
+> {%
+client.test("login A", function () { client.assert(response.status === 200, "status " + response.status); });
+client.global.set("tokenA", response.body.token);
+%}
+
+### 14 Login B
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{"usuario":"cliB{{sfx}}","contrasena":"Clave12345"}
+
+> {%
+client.test("login B", function () { client.assert(response.status === 200, "status " + response.status); });
+client.global.set("tokenB", response.body.token);
+%}
+
+### 15 Login C
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{"usuario":"cliC{{sfx}}","contrasena":"Clave12345"}
+
+> {%
+client.test("login C", function () { client.assert(response.status === 200, "status " + response.status); });
+client.global.set("tokenC", response.body.token);
+%}
+
+
+# =====================================================================
+# MULTAS - preparar el préstamo que vencerá (se devuelve en la fase 2)
+# =====================================================================
+
+### 20 Prestar c1 al lector M (quedará vencido por SQL en la pausa)
+POST {{host}}/api/prestamos
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"lectorId":{{lectorM}},"codigosEjemplar":["{{c1}}"]}
+
+> {%
+client.test("préstamo M1 creado", function () { client.assert(response.status === 201, "status " + response.status); });
+client.global.set("prestamoM1", response.body.prestamoId);
+%}
+
+
+# =====================================================================
+# RESERVAS - CICLO 1: A y B sobre el libro de un solo ejemplar
+# =====================================================================
+
+### 30 A reserva -> Confirmada con ejemplar y 48 h
+POST {{host}}/api/reservas
+Authorization: Bearer {{tokenA}}
+Content-Type: application/json
+
+{"libroId":{{libroR}}}
+
+> {%
+client.test("A Confirmada", function () {
+  client.assert(response.status === 201, "status " + response.status);
+  client.assert(response.body.estado === "Confirmada", "estado " + response.body.estado);
+  client.assert(response.body.codigoEjemplar != null, "sin codigoEjemplar");
+  client.assert(response.body.fechaExpiracion != null, "sin fechaExpiracion");
+});
+client.global.set("rA1", response.body.reservaId);
+%}
+
+### 31 B reserva el mismo libro -> Pendiente
+POST {{host}}/api/reservas
+Authorization: Bearer {{tokenB}}
+Content-Type: application/json
+
+{"libroId":{{libroR}}}
+
+> {%
+client.test("B Pendiente", function () {
+  client.assert(response.status === 201, "status " + response.status);
+  client.assert(response.body.estado === "Pendiente", "estado " + response.body.estado);
+});
+client.global.set("rB1", response.body.reservaId);
+%}
+
+### 32 A repite la reserva -> 409
+POST {{host}}/api/reservas
+Authorization: Bearer {{tokenA}}
+Content-Type: application/json
+
+{"libroId":{{libroR}}}
+
+> {%
+client.test("A repetida 409", function () { client.assert(response.status === 409, "status " + response.status); });
+%}
+
+### 33 Personal presta el ejemplar reservado al lector B -> 409
+POST {{host}}/api/prestamos
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"lectorId":{{lectorB}},"codigosEjemplar":["{{codR}}"]}
+
+> {%
+client.test("reservado para otro 409", function () { client.assert(response.status === 409, "status " + response.status); });
+%}
+
+### 34 Personal presta el ejemplar al lector A -> funciona
+POST {{host}}/api/prestamos
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"lectorId":{{lectorA}},"codigosEjemplar":["{{codR}}"]}
+
+> {%
+client.test("préstamo a A 201", function () { client.assert(response.status === 201, "status " + response.status); });
+client.global.set("prestamoA", response.body.prestamoId);
+%}
+
+### 35 La reserva de A pasó a Atendida
+GET {{host}}/api/reservas?libroId={{libroR}}&page=0&size=50
+Authorization: Bearer {{tokenStaff}}
+
+> {%
+client.test("rA1 Atendida", function () {
+  const r = response.body.contenido.find(x => String(x.reservaId) === String(client.global.get("rA1")));
+  client.assert(r && r.estado === "Atendida", "estado " + (r ? r.estado : "no encontrada"));
+});
+%}
+
+### 36 Devolver el ejemplar (Bueno) -> dispara la cola
+POST {{host}}/api/prestamos/{{prestamoA}}/devoluciones
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"lineas":[{"codigoEjemplar":"{{codR}}","condicionRecibida":"Bueno"}]}
+
+> {%
+client.test("devolución 201", function () { client.assert(response.status === 201, "status " + response.status); });
+%}
+
+### 37 La reserva de B pasó sola a Confirmada  [si falla: espera 5 s y repite SOLO este con ▶]
+GET {{host}}/api/reservas?libroId={{libroR}}&page=0&size=50
+Authorization: Bearer {{tokenStaff}}
+
+> {%
+client.test("rB1 Confirmada", function () {
+  const r = response.body.contenido.find(x => String(x.reservaId) === String(client.global.get("rB1")));
+  client.assert(r && r.estado === "Confirmada", "estado " + (r ? r.estado : "no encontrada"));
+});
+%}
+
+### 38 Limpieza: B cancela su reserva (ejemplar vuelve a Disponible)
+POST {{host}}/api/reservas/{{rB1}}/cancelar
+Authorization: Bearer {{tokenB}}
+
+> {%
+client.test("B cancela", function () {
+  client.assert(response.status === 200, "status " + response.status);
+  client.assert(response.body.estado === "Cancelada", "estado " + response.body.estado);
+});
+%}
+
+
+# =====================================================================
+# RESERVAS - CICLO 2: cancelación y cola (A, B, C)
+# =====================================================================
+
+### 40 A reserva -> Confirmada
+POST {{host}}/api/reservas
+Authorization: Bearer {{tokenA}}
+Content-Type: application/json
+
+{"libroId":{{libroR}}}
+
+> {%
+client.test("A2 Confirmada", function () {
+  client.assert(response.status === 201, "status " + response.status);
+  client.assert(response.body.estado === "Confirmada", "estado " + response.body.estado);
+});
+client.global.set("rA2", response.body.reservaId);
+%}
+
+### 41 B reserva -> Pendiente (1ro en la cola)
+POST {{host}}/api/reservas
+Authorization: Bearer {{tokenB}}
+Content-Type: application/json
+
+{"libroId":{{libroR}}}
+
+> {%
+client.test("B2 Pendiente", function () {
+  client.assert(response.status === 201, "status " + response.status);
+  client.assert(response.body.estado === "Pendiente", "estado " + response.body.estado);
+});
+client.global.set("rB2", response.body.reservaId);
+%}
+
+### 42 C reserva -> Pendiente (2do en la cola)
+POST {{host}}/api/reservas
+Authorization: Bearer {{tokenC}}
+Content-Type: application/json
+
+{"libroId":{{libroR}}}
+
+> {%
+client.test("C2 Pendiente", function () {
+  client.assert(response.status === 201, "status " + response.status);
+  client.assert(response.body.estado === "Pendiente", "estado " + response.body.estado);
+});
+client.global.set("rC2", response.body.reservaId);
+%}
+
+### 43 A cancela su reserva antes de retirar
+POST {{host}}/api/reservas/{{rA2}}/cancelar
+Authorization: Bearer {{tokenA}}
+
+> {%
+client.test("A cancela", function () {
+  client.assert(response.status === 200, "status " + response.status);
+  client.assert(response.body.estado === "Cancelada", "estado " + response.body.estado);
+});
+%}
+
+### 44 B pasó a Confirmada y C sigue Pendiente  [si falla: espera 5 s y repite SOLO este con ▶]
+GET {{host}}/api/reservas?libroId={{libroR}}&page=0&size=50
+Authorization: Bearer {{tokenStaff}}
+
+> {%
+client.test("B2 Confirmada y C2 Pendiente", function () {
+  const b = response.body.contenido.find(x => String(x.reservaId) === String(client.global.get("rB2")));
+  const c = response.body.contenido.find(x => String(x.reservaId) === String(client.global.get("rC2")));
+  client.assert(b && b.estado === "Confirmada", "B estado " + (b ? b.estado : "no encontrada"));
+  client.assert(c && c.estado === "Pendiente", "C estado " + (c ? c.estado : "no encontrada"));
+});
+%}
+
+
+# =====================================================================
+# PAUSA SQL  -  mira la salida (client.log) de ESTE request
+# =====================================================================
+
+### 99 Imprime los 2 UPDATE con los ids reales
+GET {{host}}/api/auth/me
+Authorization: Bearer {{tokenStaff}}
+
+> {%
+client.log("=== EJECUTA ESTO EN MySQL Y LUEGO CORRE 2-verificacion.http ===");
+client.log("UPDATE prestamos SET fechaVencimiento = CURDATE() - INTERVAL 4 DAY WHERE prestamoId = " + client.global.get("prestamoM1") + ";");
+client.log("UPDATE reservas SET fechaExpiracion = NOW() - INTERVAL 1 MINUTE WHERE reservaId = " + client.global.get("rB2") + ";");
+%}

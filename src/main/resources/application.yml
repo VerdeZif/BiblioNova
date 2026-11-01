@@ -1,0 +1,45 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3307/biblionova?useSSL=false&serverTimezone=America/Lima
+    username: root
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+
+app:
+  jwt:
+    secret: dTNWejY4bTVwN3I5c0FCR0RFSkpMTU5PUFFSU1RVVlhYWmFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6MTIzNDU2Nzg5MA==
+    expiracion-minutos: 120
+  admin:
+    nombre-usuario: admin
+    correo: admin@biblionova.com
+    contrasena: AdminBiblio2026!
+  almacenamiento:
+    directorio: ${EVIDENCIAS_DIR:./data/evidencias}
+  evidencias:
+    dias-retencion: 365
+  reservas:
+    horas-retencion: 48
+    max-activas-por-lector: 3
+  prestamos:
+    bloquear-con-multas-pendientes: true
+  comercio:
+    costo-delivery: 8.00                 # referencial, del documento
+    impuesto-adicional-porcentaje: 0     # tus precios ya incluyen impuestos (ejemplo del documento)
+    punto-recojo: "Tienda BiblioNova - por definir"
+    horas-confirmacion: 24               # un pedido sin confirmar se cancela solo
+    horas-recojo: 72                     # plazo de recojo (R09)
+    max-pedidos-pendientes: 3    # evita acaparar stock sin comprar
+  pagos:
+    simulacion-habilitada: true
