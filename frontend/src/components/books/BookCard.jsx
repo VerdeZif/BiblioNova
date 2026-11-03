@@ -1,7 +1,11 @@
 import { Link } from "react-router-dom";
 import { ShoppingBag, BookOpen } from "lucide-react";
+import { useCart } from "../../context/CartContext";
 
 export default function BookCard({ book }) {
+  const { addToCart, items } = useCart();
+  const inCart = items.find((item) => item.id === book.id)?.quantity || 0;
+  const canBuy = book.saleable !== false && (book.stockVenta == null || inCart < book.stockVenta);
   return (
     <article className="group overflow-hidden rounded-2xl border border-stone-200 bg-white p-3 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
       <div className="relative flex aspect-[3/4] items-center justify-center overflow-hidden rounded-xl bg-[#EEEDE7]">
@@ -36,9 +40,10 @@ export default function BookCard({ book }) {
         <div className="grid grid-cols-2 gap-2 pt-2">
           <button
             type="button"
-            disabled
-            title="Disponible cuando implementemos el carrito"
-            className="flex items-center justify-center gap-1 rounded-lg bg-[#3D7669] px-2 py-2 text-xs font-medium text-white opacity-60"
+            disabled={!canBuy}
+            onClick={() => addToCart(book)}
+            title={canBuy ? "Agregar al carrito" : "Sin stock disponible"}
+            className="flex items-center justify-center gap-1 rounded-lg bg-[#3D7669] px-2 py-2 text-xs font-medium text-white disabled:opacity-40"
           >
             <ShoppingBag size={14} />
             Comprar
@@ -46,12 +51,13 @@ export default function BookCard({ book }) {
 
           <button
             type="button"
-            disabled={!book.loanable || true}
-            title="Disponible cuando implementemos solicitudes de préstamo"
-            className="flex items-center justify-center gap-1 rounded-lg border border-stone-300 px-2 py-2 text-xs font-medium text-slate-600 opacity-60"
+            disabled={!book.loanable}
+            onClick={() => { window.location.assign(`/libro/${book.id}`); }}
+            title={book.loanable ? "Consultar información de préstamo" : "Préstamo no disponible"}
+            className="flex items-center justify-center gap-1 rounded-lg border border-stone-300 px-2 py-2 text-xs font-medium text-slate-600 disabled:opacity-40"
           >
             <BookOpen size={14} />
-            Préstamo
+            Ver préstamo
           </button>
         </div>
       </div>
