@@ -1,12 +1,16 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { iniciarSesion } from "../../services/api";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import AuthLayout from "../../components/auth/AuthLayout";
 
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
-    email: "",
+    usuario: "",
     password: "",
   });
 
@@ -19,17 +23,31 @@ export default function LoginPage() {
     setMessage("");
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!form.email.trim() || !form.password) {
+    if (!form.usuario.trim() || !form.password) {
       setMessage("Completa todos los campos.");
       return;
     }
 
-    setMessage(
-      "Formulario validado. El inicio de sesión estará disponible cuando conectemos Spring Boot."
-    );
+    setLoading(true);
+    setMessage("");
+    try {
+      const data = await iniciarSesion(form.usuario.trim(), form.password);
+      const rol = data.usuario.rol?.toLowerCase();
+      navigate(rol === "cliente" ? "/catalogo" : "/admin", { replace: true });
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        setMessage(error.response?.status === 401
+          ? "Usuario o contraseña incorrectos."
+          : error.response?.data?.mensaje || "No se pudo conectar con el servidor. Verifica que Spring Boot esté iniciado.");
+      } else {
+        setMessage(error.message || "No se pudo iniciar sesión.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -39,21 +57,21 @@ export default function LoginPage() {
     >
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label htmlFor="login-email" className="mb-2 block text-sm font-semibold text-slate-700">
-            Correo electrónico
+          <label htmlFor="login-usuario" className="mb-2 block text-sm font-semibold text-slate-700">
+            Nombre de usuario
           </label>
 
           <div className="relative">
             <Mail size={19} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
-              id="login-email"
-              name="email"
-              type="email"
-              autoComplete="email"
+              id="login-usuario"
+              name="usuario"
+              type="text"
+              autoComplete="username"
               required
-              value={form.email}
+              value={form.usuario}
               onChange={handleChange}
-              placeholder="correo@ejemplo.com"
+              placeholder="Tu nombre de usuario"
               className="w-full rounded-full border border-stone-200 bg-white py-3.5 pl-12 pr-4 outline-none focus:border-[#3D7669]"
             />
           </div>
@@ -98,17 +116,10 @@ export default function LoginPage() {
 
         <button
           type="submit"
-          className="w-full rounded-xl bg-[#3D7669] py-3.5 font-semibold text-white transition hover:bg-[#315e55]"
+          disabled={loading}
+          className="w-full rounded-xl bg-[#3D7669] py-3.5 font-semibold text-white transition hover:bg-[#315e55] disabled:opacity-60"
         >
-            <div className="flex justify-end">
-  <Link
-    to="/recuperar-contrasena"
-    className="text-sm font-medium text-[#3D7669] hover:underline"
-  >
-    ¿Olvidaste tu contraseña?
-  </Link>
-</div>
-          Iniciar sesión
+          {loading ? "Ingresando..." : "Iniciar sesión"}
         </button>
       </form>
 
