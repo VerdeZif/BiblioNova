@@ -1,26 +1,37 @@
     
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, BookOpen, Minus, Plus, ShoppingBag } from "lucide-react";
 import Navbar from "../../components/layout/Navbar";
-import { books } from "../../data/books";
+import { obtenerLibros, USE_MOCKS } from "../../services/catalogo";
 import { useCart } from "../../context/CartContext";
 
 export default function BookDetailPage() {
   const { id } = useParams();
-  const book = books.find((item) => item.id === Number(id));
+  const [book, setBook] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    obtenerLibros()
+      .then((list) => { if (active) setBook(list.find((item) => item.id === Number(id)) || null); })
+      .catch((err) => { if (active) setError(err.message || "Error al cargar el libro."); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [id]);
 
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const { addToCart } = useCart();
 
-  if (!book) {
+  if (loading || !book) {
     return (
       <div className="min-h-screen bg-[#F8F6F1]">
         <Navbar />
         <div className="mx-auto max-w-5xl px-5 py-20 text-center">
           <h1 className="text-3xl font-bold text-slate-800">
-            Libro no encontrado
+            {loading ? "Cargando libro..." : error || "Libro no encontrado"}
           </h1>
           <Link to="/catalogo" className="mt-5 inline-block text-[#3D7669]">
             Volver al catálogo
@@ -31,6 +42,7 @@ export default function BookDetailPage() {
   }
 
   const handleAdd = () => {
+    if (book.saleable === false) return;
     addToCart(book, quantity);
     setAdded(true);
   };
@@ -102,7 +114,7 @@ export default function BookDetailPage() {
 
                 <button
                   type="button"
-                  onClick={() => setQuantity((q) => Math.min(99, q + 1))}
+                  onClick={() => setQuantity((q) => Math.min(book.stockVenta ?? 99, 99, q + 1))}
                   className="p-3 text-slate-600"
                   aria-label="Aumentar cantidad"
                 >
@@ -114,6 +126,7 @@ export default function BookDetailPage() {
             <button
               type="button"
               onClick={handleAdd}
+              disabled={book.saleable === false}
               className="mt-7 flex items-center justify-center gap-2 rounded-xl bg-[#3D7669] px-6 py-4 font-semibold text-white transition hover:bg-[#315e55]"
             >
               <ShoppingBag size={20} />
@@ -130,8 +143,7 @@ export default function BookDetailPage() {
             )}
 
             <p className="mt-5 text-xs text-slate-400">
-              Los precios y existencias son demostrativos.
-              La compra todavía no procesa pagos.
+              {USE_MOCKS ? "Datos de demostración. " : ""}La compra todavía no procesa pagos reales.
             </p>
           </div>
         </div>
