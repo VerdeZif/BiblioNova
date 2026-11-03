@@ -1,11 +1,25 @@
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Search, SlidersHorizontal, RotateCcw, BookOpen } from "lucide-react";
 import Navbar from "../../components/layout/Navbar";
 import BookCard from "../../components/books/BookCard";
-import { books, categories } from "../../data/books";
+import { obtenerLibros, USE_MOCKS } from "../../services/catalogo";
 
 export default function CatalogPage() {
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    obtenerLibros()
+      .then((data) => { if (active) setBooks(data); })
+      .catch((err) => { if (active) setError(err.message || "Error al cargar libros."); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, []);
+
+  const categories = useMemo(() => ["Todas", ...new Set(books.map((book) => book.category))], [books]);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("Todas");
   const [onlyLoans, setOnlyLoans] = useState(false);
@@ -41,7 +55,7 @@ export default function CatalogPage() {
     }
 
     return result;
-  }, [search, category, onlyLoans, sortBy]);
+  }, [books, search, category, onlyLoans, sortBy]);
 
   const clearFilters = () => {
     setSearch("");
@@ -71,6 +85,8 @@ export default function CatalogPage() {
           </p>
         </section>
 
+        {USE_MOCKS && <p className="mb-4 rounded-lg bg-amber-50 px-4 py-2 text-sm text-amber-800">Modo demostración: catálogo con datos simulados.</p>}
+        {error && <p role="alert" className="mb-4 rounded-lg bg-red-50 px-4 py-2 text-sm text-red-700">{error}</p>}
         {/* FILTROS */}
         <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
           <div className="mb-5 flex items-center gap-2">
@@ -187,7 +203,9 @@ export default function CatalogPage() {
             </span>
           </div>
 
-          {filteredBooks.length > 0 ? (
+          {loading ? (
+            <p className="py-10 text-center text-slate-500">Cargando libros...</p>
+          ) : filteredBooks.length > 0 ? (
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {filteredBooks.map((book) => (
                 <BookCard key={book.id} book={book} />
