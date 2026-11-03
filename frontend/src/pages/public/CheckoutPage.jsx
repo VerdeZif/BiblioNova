@@ -1,6 +1,6 @@
-
+import { crearPedidoDemo } from "../../services/pedidosDemo";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Banknote,
@@ -14,7 +14,11 @@ import Navbar from "../../components/layout/Navbar";
 import { useCart } from "../../context/CartContext";
 
 export default function CheckoutPage() {
-  const { items, totalItems, totalPrice } = useCart();
+  const { items, totalItems, totalPrice, clearCart } = useCart();
+
+  const navigate = useNavigate();
+
+  const [error, setError] = useState("");
 
   const [deliveryType, setDeliveryType] = useState("recojo");
   const [paymentMethod, setPaymentMethod] = useState("tienda");
@@ -43,6 +47,70 @@ export default function CheckoutPage() {
   const updateField = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
+
+const confirmarPedido = () => {
+  setError("");
+
+  // Validar datos del comprador
+  if (!form.nombres.trim() || !form.apellidos.trim()) {
+    setError("Debes ingresar tus nombres y apellidos.");
+    return;
+  }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.correo.trim())) {
+    setError("Ingresa un correo electrónico válido.");
+    return;
+  }
+
+  if (!/^\d{9}$/.test(form.telefono.trim())) {
+    setError("Ingresa un número de teléfono válido de 9 dígitos.");
+    return;
+  }
+
+  // Validar dirección si seleccionó delivery
+  if (
+    deliveryType === "delivery" &&
+    (!form.direccion.trim() || !form.distrito.trim())
+  ) {
+    setError("Completa la dirección y el distrito de entrega.");
+    return;
+  }
+
+  // No permitir pagos online todavía
+  if (paymentMethod === "online") {
+    setError("El pago online todavía no está disponible.");
+    return;
+  }
+
+  if (items.length === 0) {
+    setError("Tu carrito está vacío.");
+    return;
+  }
+
+  try {
+    // Crear pedido de demostración
+    const pedido = crearPedidoDemo(
+      {
+        ...form,
+        tipoEntrega: deliveryType,
+        metodoPago: paymentMethod,
+      },
+      items,
+      total
+    );
+
+    // Vaciar carrito después de guardar el pedido
+    clearCart();
+
+    // Mostrar comprobante
+    navigate("/pedido-confirmado", {
+      state: { pedido },
+    });
+
+  } catch (err) {
+    setError(err.message || "Ocurrió un error al registrar el pedido.");
+  }
+};
 
   const inputClass =
     "w-full rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm outline-none focus:border-[#3D7669]";
@@ -329,14 +397,20 @@ export default function CheckoutPage() {
                 <span>S/ {total.toFixed(2)}</span>
               </div>
 
-              <button
-                type="button"
-                disabled
-                title="Se habilitará cuando integremos la gestión de pedidos"
-                className="mt-6 w-full cursor-not-allowed rounded-xl bg-[#3D7669] py-3 font-semibold text-white opacity-50"
-              >
-                Confirmar pedido (próximamente)
-              </button>
+             {error && (
+  <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">
+    {error}
+  </p>
+)}
+
+<button
+  type="button"
+  onClick={confirmarPedido}
+  disabled={paymentMethod === "online"}
+  className="mt-6 w-full rounded-xl bg-[#3D7669] py-3 font-semibold text-white transition hover:bg-[#315e55] disabled:cursor-not-allowed disabled:opacity-40"
+>
+  Confirmar pedido
+</button>
 
               <p className="mt-3 text-center text-xs text-slate-400">
                 No se procesarán pagos ni pedidos reales.

@@ -7,6 +7,10 @@ export const USE_MOCKS = import.meta.env.VITE_USE_MOCKS !== "false";
 export function adaptLibro(libro) {
   return {
     id: libro.libroId,
+    isbn: libro.isbn,
+editorial: libro.editorial?.nombre || "No especificada",
+anioPublicacion: libro.anioPublicacion,
+descripcion: libro.descripcion || "Sin descripción disponible",
     title: libro.titulo,
     author: (libro.autores || []).map((a) => a.nombre).join(", ") || "Autor no registrado",
     category: libro.categoria?.nombre || "Sin categoría",
@@ -24,7 +28,7 @@ export async function obtenerLibros() {
     return demoBooks.map((book) => ({
       ...book,
       saleable: true,
-      stockVenta: 10,
+      stockVenta: book.stockVenta ?? 10,
       stockPrestamo: book.loanable ? 5 : 0,
     }));
   }

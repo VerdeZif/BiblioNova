@@ -1,13 +1,17 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ShoppingBag, BookOpen } from "lucide-react";
 import { useCart } from "../../context/CartContext";
+import { useState } from "react";
+import BookPurchaseDrawer from "./BookPurchaseDrawer";
 
 export default function BookCard({ book }) {
   const navigate = useNavigate();
   const { addToCart, items } = useCart();
   const inCart = items.find((item) => item.id === book.id)?.quantity || 0;
   const canBuy = book.saleable !== false && (book.stockVenta == null || inCart < book.stockVenta);
+  const [showPurchaseDrawer, setShowPurchaseDrawer] = useState(false);
   return (
+      <>
     <article className="group overflow-hidden rounded-2xl border border-stone-200 bg-white p-3 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
       <div className="relative flex aspect-[3/4] items-center justify-center overflow-hidden rounded-xl bg-[#EEEDE7]">
         <img
@@ -42,10 +46,10 @@ export default function BookCard({ book }) {
           <button
             type="button"
             disabled={!canBuy}
-            onClick={() => addToCart(book)}
+            onClick={() => setShowPurchaseDrawer(true)}
             title={canBuy ? "Agregar al carrito" : "Sin stock disponible"}
-            className="flex items-center justify-center gap-1 rounded-lg bg-[#3D7669] px-2 py-2 text-xs font-medium text-white disabled:opacity-40"
-          >
+             className="flex items-center justify-center gap-1 rounded-lg bg-[#3D7669] px-2 py-2 text-xs font-medium text-white transition hover:bg-[#315e55] disabled:cursor-not-allowed disabled:opacity-40"
+            >
             <ShoppingBag size={14} />
             Comprar
           </button>
@@ -61,7 +65,15 @@ export default function BookCard({ book }) {
             Ver préstamo
           </button>
         </div>
-      </div>
+            </div>
     </article>
+
+    {showPurchaseDrawer && (
+      <BookPurchaseDrawer
+        book={book}
+        onClose={() => setShowPurchaseDrawer(false)}
+      />
+    )}
+  </>
   );
 }

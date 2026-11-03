@@ -25,33 +25,57 @@ export function CartProvider({ children }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
-  const addToCart = (book, quantity = 1) => {
-    const amount = Math.max(1, Math.floor(Number(quantity) || 1));
+  
+const addToCart = (book, quantity = 1) => {
+  const amount = Math.max(
+    1,
+    Math.floor(Number(quantity) || 1)
+  );
 
-    setItems((current) => {
-      const existing = current.find((item) => item.id === book.id);
+  // Declaramos stock ANTES de utilizarlo
+  const stock = Math.max(
+    0,
+    Number(book.stockVenta ?? 99)
+  );
 
-      if (existing) {
-        return current.map((item) =>
-          item.id === book.id
-            ? { ...item, quantity: item.quantity + amount }
-            : item
-        );
-      }
+  setItems((current) => {
+    // No agregar libros sin stock
+    if (stock <= 0) return current;
 
-      return [
-        ...current,
-        {
-          id: book.id,
-          title: book.title,
-          author: book.author,
-          image: book.image,
-          price: book.price,
-          quantity: amount,
-        },
-      ];
-    });
-  };
+    const existing = current.find(
+      (item) => item.id === book.id
+    );
+
+    if (existing) {
+      return current.map((item) =>
+        item.id === book.id
+          ? {
+              ...item,
+              stockVenta: stock,
+              quantity: Math.min(
+                stock,
+                item.quantity + amount
+              ),
+            }
+          : item
+      );
+    }
+
+    return [
+      ...current,
+      {
+        id: book.id,
+        title: book.title,
+        author: book.author,
+        image: book.image,
+        price: book.price,
+        quantity: Math.min(amount, stock),
+        stockVenta: stock,
+      },
+    ];
+  });
+};
+
 
   const removeFromCart = (id) => {
     setItems((current) => current.filter((item) => item.id !== id));
@@ -69,7 +93,15 @@ export function CartProvider({ children }) {
 
     setItems((current) =>
       current.map((item) =>
-        item.id === id ? { ...item, quantity: amount } : item
+item.id === id
+  ? {
+      ...item,
+      quantity: Math.min(
+        amount,
+        Math.max(0, Number(item.stockVenta ?? 99))
+      ),
+    }
+  : item
       )
     );
   };

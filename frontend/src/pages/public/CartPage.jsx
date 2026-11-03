@@ -89,16 +89,19 @@ export default function CartPage() {
                           {item.quantity}
                         </span>
 
-                        <button
-                          type="button"
-                          aria-label="Aumentar cantidad"
-                          onClick={() =>
-                            updateQuantity(item.id, item.quantity + 1)
-                          }
-                          className="p-2"
-                        >
-                          <Plus size={15} />
-                        </button>
+                        
+<button
+  type="button"
+  disabled={item.quantity >= (item.stockVenta ?? 99)}
+  aria-label="Aumentar cantidad"
+  onClick={() =>
+    updateQuantity(item.id, item.quantity + 1)
+  }
+  className="p-2 disabled:opacity-30 disabled:cursor-not-allowed"
+>
+  <Plus size={15} />
+</button>
+
                       </div>
 
                       <button

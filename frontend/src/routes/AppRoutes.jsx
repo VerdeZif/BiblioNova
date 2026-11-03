@@ -6,6 +6,7 @@ import HomePage from "../pages/public/HomePage";
 import BookDetailPage from "../pages/public/BookDetailPage";
 import CartPage from "../pages/public/CartPage";
 import CheckoutPage from "../pages/public/CheckoutPage";
+import OrderConfirmationPage from "../pages/public/OrderConfirmationPage";
 
 function Placeholder({ title }) {
   return (
@@ -30,10 +31,11 @@ export default function AppRoutes() {
         <Route path="/catalogo" element={<CatalogPage />} />
         <Route path="/carrito" element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
+        <Route path="/pedido-confirmado" element={<OrderConfirmationPage />}/>
+
         {/* Autenticación */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
-
         {/* Clientes */}
         <Route path="/mi-cuenta" element={<Placeholder title="Mi cuenta" />} />
         <Route path="/mis-pedidos" element={<Placeholder title="Mis pedidos" />} />

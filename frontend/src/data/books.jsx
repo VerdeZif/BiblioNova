@@ -8,6 +8,11 @@ export const books = [
     price: 35.90,
     loanable: true,
     image: "https://covers.openlibrary.org/b/isbn/9780156012195-L.jpg",
+    stockVenta: 3,
+isbn: "9780156012195",
+editorial: "Editorial de demostración",
+anioPublicacion: 1943,
+descripcion: "Un relato sobre la amistad, la imaginación y la naturaleza humana.",
   },
   {
     id: 2,
