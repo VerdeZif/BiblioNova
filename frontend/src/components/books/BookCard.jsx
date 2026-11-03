@@ -1,8 +1,9 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ShoppingBag, BookOpen } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 
 export default function BookCard({ book }) {
+  const navigate = useNavigate();
   const { addToCart, items } = useCart();
   const inCart = items.find((item) => item.id === book.id)?.quantity || 0;
   const canBuy = book.saleable !== false && (book.stockVenta == null || inCart < book.stockVenta);
@@ -52,7 +53,7 @@ export default function BookCard({ book }) {
           <button
             type="button"
             disabled={!book.loanable}
-            onClick={() => { window.location.assign(`/libro/${book.id}`); }}
+            onClick={() => navigate(`/libro/${book.id}`)}
             title={book.loanable ? "Consultar información de préstamo" : "Préstamo no disponible"}
             className="flex items-center justify-center gap-1 rounded-lg border border-stone-300 px-2 py-2 text-xs font-medium text-slate-600 disabled:opacity-40"
           >
