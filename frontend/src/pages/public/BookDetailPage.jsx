@@ -26,7 +26,7 @@ const [added, setAdded] = useState(false);
 const [loanMessage, setLoanMessage] = useState("");
 const [loanError, setLoanError] = useState("");
 
-const { addToCart } = useCart();
+const { addToCart, items } = useCart();
   if (loading || !book) {
     return (
       <div className="min-h-screen bg-[#F8F6F1]">
@@ -44,8 +44,13 @@ const { addToCart } = useCart();
   }
 
 
+  const inCart = items.filter((item) => String(item.id) === String(book.id)).reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const remaining = Math.max(0, Number(book.stockVenta ?? 0) - inCart);
+  const canBuy = book.saleable !== false && remaining > 0;
+  const canLoan = book.loanable === true && Number(book.stockPrestamo ?? 0) > 0;
+
   const handleAdd = () => {
-    if (book.saleable === false) return;
+    if (!canBuy || quantity > remaining) return;
 
     addToCart(book, quantity);
     setAdded(true);
@@ -108,9 +113,9 @@ const { addToCart } = useCart();
 
             <div className="mt-6 flex items-center gap-2 text-sm text-slate-600">
               <BookOpen size={18} className="text-[#3D7669]" />
-              {book.loanable
-                ? "Disponible para solicitar préstamo"
-                : "Disponible solo para venta"}
+              {canLoan
+                ? `Disponible para préstamo (${book.stockPrestamo} ejemplares)`
+                : "Préstamo no disponible"}
             </div>
 
             <div className="mt-8">
@@ -134,7 +139,8 @@ const { addToCart } = useCart();
 
                 <button
                   type="button"
-                  onClick={() => setQuantity((q) => Math.min(book.stockVenta ?? 99, 99, q + 1))}
+                  disabled={!canBuy || quantity >= remaining}
+                  onClick={() => setQuantity((q) => Math.min(remaining, q + 1))}
                   className="p-3 text-slate-600"
                   aria-label="Aumentar cantidad"
                 >
@@ -146,17 +152,18 @@ const { addToCart } = useCart();
             <button
               type="button"
               onClick={handleAdd}
-              disabled={book.saleable === false}
+              disabled={!canBuy || quantity > remaining}
               className="mt-7 flex items-center justify-center gap-2 rounded-xl bg-[#3D7669] px-6 py-4 font-semibold text-white transition hover:bg-[#315e55]"
             >
               <ShoppingBag size={20} />
-              Agregar al carrito
+              {canBuy ? "Agregar al carrito" : "Sin stock de venta"}
             </button>
 
 {book.loanable && (
   <button
     type="button"
     onClick={handleLoan}
+    disabled={!canLoan}
     className="mt-3 flex items-center justify-center gap-2 rounded-xl border-2 border-[#3D7669] px-6 py-4 font-semibold text-[#3D7669] transition hover:bg-[#F0F7F4]"
   >
     <BookOpen size={20} />
