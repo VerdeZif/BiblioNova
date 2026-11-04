@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import AuthLayout from "../../components/auth/AuthLayout";
+import { guardarUsuarioDemo } from "../../services/usuariosDemo";
+import { USE_MOCKS } from "../../services/catalogo";
 
 export default function RegisterPage() {
   const [form, setForm] = useState({
@@ -48,9 +50,15 @@ export default function RegisterPage() {
       return;
     }
 
-    setMessage(
-      "Datos validados correctamente. El registro real estará disponible al conectar el backend."
-    );
+    if (USE_MOCKS) {
+      try {
+        const usuario = form.email.trim().toLowerCase();
+        guardarUsuarioDemo({ nombre: `${form.firstName.trim()} ${form.lastName.trim()}`, usuario, correo: usuario, rol: "cliente", estado: "Activo" });
+        setMessage("Cuenta de demostración creada. Para ingresar, usa tu correo como usuario y la contraseña demo1234. La contraseña escrita en este formulario no se guarda.");
+      } catch (err) { setError(err.message || "No se pudo registrar el usuario."); }
+    } else {
+      setMessage("Datos validados correctamente. El registro real estará disponible al conectar el backend.");
+    }
   };
 
  const inputClass =
@@ -60,6 +68,7 @@ export default function RegisterPage() {
       title="Crea tu cuenta"
       subtitle="Únete a BiblioNova y comienza a descubrir nuevas lecturas."
     >
+      {USE_MOCKS && <p className="mb-5 rounded-xl bg-amber-50 p-4 text-sm text-amber-900">Modo demostración: el registro crea un usuario local, pero no almacena contraseñas. Todas las cuentas demo ingresan con <strong>demo1234</strong>. No uses contraseñas personales.</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
