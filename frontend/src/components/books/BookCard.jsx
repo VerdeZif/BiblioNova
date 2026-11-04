@@ -21,7 +21,7 @@ export default function BookCard({ book }) {
 
   const canBuy =
   book.saleable !== false &&
-  (book.stockVenta == null || stockVenta > inCart);
+  stockVenta > inCart;
 
 const canLoan =
   book.loanable === true &&
