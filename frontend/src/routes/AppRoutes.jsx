@@ -65,7 +65,6 @@ export default function AppRoutes() {
 
   <Route path="pedidos" element={<AdminOrdersPage />} />
 
-  <Route path="inventario" element={<AdminInventoryPage />} />
 
   <Route
     path="usuarios"
@@ -81,15 +80,7 @@ export default function AppRoutes() {
         <Route path="/mis-pedidos" element={<Placeholder title="Mis pedidos" />} />
         <Route path="/mis-prestamos" element={<Placeholder title="Mis préstamos" />} />
 
-        {/* Administración */}
-        <Route path="/admin" element={<Placeholder title="Dashboard administrativo" />} />
-        <Route path="/admin/libros" element={<Placeholder title="Inventario" />} />
-        <Route path="/admin/prestamos" element={<Placeholder title="Préstamos" />} />
-        <Route path="/admin/devoluciones" element={<Placeholder title="Devoluciones" />} />
-        <Route path="/admin/ventas" element={<Placeholder title="Punto de venta" />} />
-        <Route path="/admin/usuarios" element={<Placeholder title="Usuarios" />} />
-          <Route path="/admin/inventario" element={<Placeholder title="Inventario" />} />
-          
+                
         {/* Página no encontrada */}
         <Route path="*" element={<Placeholder title="Página no encontrada" />} />
         <Route path="/libro/:id" element={<BookDetailPage />} />
