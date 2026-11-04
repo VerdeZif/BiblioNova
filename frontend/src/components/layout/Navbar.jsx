@@ -1,4 +1,6 @@
 import { useCart } from "../../context/CartContext";
+import { obtenerSesionDemo, cerrarSesionDemo } from "../../services/usuariosDemo";
+import { USE_MOCKS } from "../../services/catalogo";
 import { Link, NavLink } from "react-router-dom";
 import { BookOpen, Search, ShoppingBag, UserRound } from "lucide-react";
 
@@ -9,6 +11,7 @@ export default function Navbar() {
       isActive ? "text-emerald-700 font-semibold" : "text-slate-600"
     }`;
     const { totalItems } = useCart();
+    const sesion = USE_MOCKS ? obtenerSesionDemo() : null;
   return (
     <header className="sticky top-0 z-50 border-b border-stone-200 bg-[#F8F6F1]/95 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
@@ -67,12 +70,13 @@ export default function Navbar() {
   )}
 </Link>
 
+          {sesion && <button type="button" onClick={() => { cerrarSesionDemo(); window.location.assign("/"); }} className="text-xs font-medium text-slate-600 hover:text-red-600">Salir ({sesion.usuario})</button>}
           <Link
-            to="/login"
+            to={sesion ? (sesion.rol === "admin" ? "/admin" : sesion.rol === "bibliotecario" ? "/bibliotecario" : "/catalogo") : "/login"}
             className="flex items-center gap-2 rounded-xl bg-[#3D7669] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#315e55]"
           >
             <UserRound size={17} />
-            <span className="hidden sm:inline">Ingresar</span>
+            <span className="hidden sm:inline">{sesion ? "Mi panel" : "Ingresar"}</span>
           </Link>
         </div>
       </div>
