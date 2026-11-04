@@ -12,6 +12,7 @@ import {
 import { obtenerLibros } from "../../services/catalogo";
 import { obtenerPedidosDemo } from "../../services/pedidosDemo";
 import { obtenerPrestamosDemo } from "../../services/prestamosDemo";
+import { obtenerUsuariosDemo } from "../../services/usuariosDemo";
 
 export default function AdminDashboard() {
   const [totalLibros, setTotalLibros] = useState(0);
@@ -64,7 +65,7 @@ export default function AdminDashboard() {
     },
     {
       titulo: "Usuarios registrados",
-      valor: "—",
+      valor: obtenerUsuariosDemo().length,
       icono: Users,
     },
   ];
@@ -169,7 +170,7 @@ export default function AdminDashboard() {
       <p className="mt-8 text-xs text-slate-400">
         Panel de demostración. Los pedidos y préstamos
         se consultan desde el almacenamiento local.
-        La gestión de usuarios todavía no está conectada.
+        Los usuarios también se gestionan localmente en modo demostración.
       </p>
     </main>
   );
