@@ -1,0 +1,337 @@
+# =====================================================================
+# BIBLIONOVA - PRUEBAS 4A  |  FASE 2 de 2  (Run all requests in file)
+# =====================================================================
+# Requisitos: haber corrido 1-preparacion.http y ejecutado en MySQL los
+# 2 UPDATE que imprimió el último request. Usa las variables guardadas
+# por la fase 1 (tokens, ids, códigos), así que NO cierres el IDE entre
+# fases. foto.jpg debe estar junto a este archivo.
+# El request 50 se ejecuta aparte con ▶ (60+ s después del UPDATE).
+# =====================================================================
+
+@host = http://localhost:8080
+@staffUser = admin
+@staffPass = AdminBiblio2026!
+
+### 00 Re-login personal (por si el token expiró)
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{"usuario":"{{staffUser}}","contrasena":"{{staffPass}}"}
+
+> {%
+client.test("login personal", function () { client.assert(response.status === 200, "status " + response.status); });
+client.global.set("tokenStaff", response.body.token);
+%}
+
+### 01 Re-login cliente A
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{"usuario":"cliA{{sfx}}","contrasena":"Clave12345"}
+
+> {%
+client.test("login A", function () { client.assert(response.status === 200, "status " + response.status); });
+client.global.set("tokenA", response.body.token);
+%}
+
+
+# =====================================================================
+# MULTAS 1: retraso
+# =====================================================================
+
+### 10 Devolver c1 (Bueno) con 4 días de retraso
+POST {{host}}/api/prestamos/{{prestamoM1}}/devoluciones
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"lineas":[{"codigoEjemplar":"{{c1}}","condicionRecibida":"Bueno"}]}
+
+> {%
+client.test("devolución con 4 días de retraso", function () {
+  client.assert(response.status === 201, "status " + response.status);
+  client.assert(response.body.lineas[0].diasRetraso === 4, "diasRetraso " + response.body.lineas[0].diasRetraso + " (¿corriste el UPDATE de prestamos?)");
+});
+%}
+
+### 11 Multa Retraso: S/ 4.00, diasRetraso 4, saldo 4.00
+GET {{host}}/api/prestamos/multas?lectorId={{lectorM}}&soloConSaldo=true&page=0&size=10
+Authorization: Bearer {{tokenStaff}}
+
+> {%
+client.test("multa Retraso 4.00", function () {
+  const m = response.body.contenido[0];
+  client.assert(m.tipoMulta === "Retraso", "tipo " + m.tipoMulta);
+  client.assert(m.monto === 4, "monto " + m.monto);
+  client.assert(m.diasRetraso === 4, "dias " + m.diasRetraso);
+  client.assert(m.saldo === 4, "saldo " + m.saldo);
+  client.global.set("multaR", m.multaId);
+});
+%}
+
+### 12 Préstamo nuevo al lector M -> 409 (multas pendientes)
+POST {{host}}/api/prestamos
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"lectorId":{{lectorM}},"codigosEjemplar":["{{c2}}"]}
+
+> {%
+client.test("bloqueado por multa 409", function () { client.assert(response.status === 409, "status " + response.status); });
+%}
+
+### 13 Pago 1.50 -> Parcial, saldo 2.50
+POST {{host}}/api/prestamos/multas/{{multaR}}/pagos
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"metodoCodigo":"EFECTIVO_TIENDA","monto":1.50}
+
+> {%
+client.test("Parcial saldo 2.50", function () {
+  client.assert(response.status === 200, "status " + response.status);
+  client.assert(response.body.multa.estado === "Parcial", "estado " + response.body.multa.estado);
+  client.assert(response.body.multa.saldo === 2.5, "saldo " + response.body.multa.saldo);
+});
+%}
+
+### 14 Pago 3.00 -> 409 (excede el saldo)
+POST {{host}}/api/prestamos/multas/{{multaR}}/pagos
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"metodoCodigo":"EFECTIVO_TIENDA","monto":3.00}
+
+> {%
+client.test("excede saldo 409", function () { client.assert(response.status === 409, "status " + response.status); });
+%}
+
+### 15 Pago 2.50 -> Pagada
+POST {{host}}/api/prestamos/multas/{{multaR}}/pagos
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"metodoCodigo":"EFECTIVO_TIENDA","monto":2.50}
+
+> {%
+client.test("Pagada", function () {
+  client.assert(response.status === 200, "status " + response.status);
+  client.assert(response.body.multa.estado === "Pagada", "estado " + response.body.multa.estado);
+});
+%}
+
+### 16 El lector M vuelve a poder pedir libros (c2)
+POST {{host}}/api/prestamos
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"lectorId":{{lectorM}},"codigosEjemplar":["{{c2}}"]}
+
+> {%
+client.test("préstamo desbloqueado 201", function () { client.assert(response.status === 201, "status " + response.status); });
+client.global.set("prestamoD", response.body.prestamoId);
+client.global.set("ejemplarD", response.body.ejemplares[0].ejemplarId);
+client.global.set("detalleD", response.body.ejemplares[0].detallePrestamoId);
+%}
+
+
+# =====================================================================
+# MULTAS 2: daño, evaluación, anulación
+# =====================================================================
+
+### 20 Devolver c2 Danado con observaciones
+POST {{host}}/api/prestamos/{{prestamoD}}/devoluciones
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"lineas":[{"codigoEjemplar":"{{c2}}","condicionRecibida":"Danado","observaciones":"Tapa rota en la devolución"}]}
+
+> {%
+client.test("daño requiere evaluación", function () {
+  client.assert(response.status === 201, "status " + response.status);
+  client.assert(response.body.lineas[0].requiereEvaluacion === true, "requiereEvaluacion");
+});
+%}
+
+### 21 Multa Danio en EnRevision con monto 0
+GET {{host}}/api/prestamos/multas?lectorId={{lectorM}}&tipo=Danio&page=0&size=10
+Authorization: Bearer {{tokenStaff}}
+
+> {%
+client.test("Danio EnRevision monto 0", function () {
+  const m = response.body.contenido[0];
+  client.assert(m.estado === "EnRevision", "estado " + m.estado);
+  client.assert(m.monto === 0, "monto " + m.monto);
+  client.global.set("multaD", m.multaId);
+});
+%}
+
+### 22 Pagar una multa EnRevision -> 409
+POST {{host}}/api/prestamos/multas/{{multaD}}/pagos
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"metodoCodigo":"EFECTIVO_TIENDA","monto":1.00}
+
+> {%
+client.test("pago en revisión 409", function () { client.assert(response.status === 409, "status " + response.status); });
+%}
+
+### 23 Evaluar: 15.00 -> Pendiente
+POST {{host}}/api/prestamos/multas/{{multaD}}/evaluacion
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"monto":15.00,"justificacion":"Reposición de tapa"}
+
+> {%
+client.test("evaluada Pendiente 15.00", function () {
+  client.assert(response.status === 200, "status " + response.status);
+  client.assert(response.body.multa.estado === "Pendiente", "estado " + response.body.multa.estado);
+  client.assert(response.body.multa.monto === 15, "monto " + response.body.multa.monto);
+});
+%}
+
+### 24 Lector M2: prestar c3
+POST {{host}}/api/prestamos
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"lectorId":{{lectorM2}},"codigosEjemplar":["{{c3}}"]}
+
+> {%
+client.test("préstamo M2 201", function () { client.assert(response.status === 201, "status " + response.status); });
+client.global.set("prestamoE", response.body.prestamoId);
+%}
+
+### 25 Lector M2: devolver c3 Danado
+POST {{host}}/api/prestamos/{{prestamoE}}/devoluciones
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"lineas":[{"codigoEjemplar":"{{c3}}","condicionRecibida":"Danado","observaciones":"Páginas arrancadas"}]}
+
+> {%
+client.test("devolución dañada M2", function () { client.assert(response.status === 201, "status " + response.status); });
+%}
+
+### 26 Multa Danio del lector M2
+GET {{host}}/api/prestamos/multas?lectorId={{lectorM2}}&tipo=Danio&page=0&size=10
+Authorization: Bearer {{tokenStaff}}
+
+> {%
+client.test("multa Danio M2", function () {
+  const m = response.body.contenido[0];
+  client.assert(m.estado === "EnRevision", "estado " + m.estado);
+  client.global.set("multaE", m.multaId);
+});
+%}
+
+### 27 Anular esa multa
+POST {{host}}/api/prestamos/multas/{{multaE}}/anulacion
+Authorization: Bearer {{tokenStaff}}
+Content-Type: application/json
+
+{"motivo":"Prueba de anulación"}
+
+> {%
+client.test("multa Anulada", function () {
+  client.assert(response.status === 200, "status " + response.status);
+  client.assert(response.body.multa.estado === "Anulada", "estado " + response.body.multa.estado);
+});
+%}
+
+
+# =====================================================================
+# EVIDENCIAS (sobre el ejemplar dañado c2)
+# =====================================================================
+
+### 30 Archivo falso (texto con nombre .jpg) -> 400
+POST {{host}}/api/prestamos/evidencias?ejemplarId={{ejemplarD}}&tipo=Devolucion&detallePrestamoId={{detalleD}}&descripcion=archivo falso
+Authorization: Bearer {{tokenStaff}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="archivo"; filename="falso.jpg"
+Content-Type: image/jpeg
+
+esto es texto plano, no es una imagen
+--WebAppBoundary--
+
+> {%
+client.test("archivo falso 400", function () { client.assert(response.status === 400, "status " + response.status); });
+%}
+
+### 31 JPG real -> 201
+POST {{host}}/api/prestamos/evidencias?ejemplarId={{ejemplarD}}&tipo=Devolucion&detallePrestamoId={{detalleD}}&descripcion=Tapa rota
+Authorization: Bearer {{tokenStaff}}
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="archivo"; filename="foto.jpg"
+Content-Type: image/jpeg
+
+< ./foto.jpg
+--WebAppBoundary--
+
+> {%
+client.test("evidencia subida", function () { client.assert(response.status === 201, "status " + response.status); });
+client.global.set("evidenciaId", response.body.evidenciaId);
+%}
+
+### 32 Descargar la imagen
+GET {{host}}/api/prestamos/evidencias/{{evidenciaId}}/archivo
+Authorization: Bearer {{tokenStaff}}
+
+> {%
+client.test("imagen devuelta", function () {
+  client.assert(response.status === 200, "status " + response.status);
+  client.assert(response.contentType.mimeType.startsWith("image/"), "content-type " + response.contentType.mimeType);
+});
+%}
+
+### 33 La multa de daño ahora cuenta 1 evidencia
+GET {{host}}/api/prestamos/multas/{{multaD}}
+Authorization: Bearer {{tokenStaff}}
+
+> {%
+client.test("evidencias = 1", function () { client.assert(response.body.evidencias === 1, "evidencias " + response.body.evidencias); });
+%}
+
+
+# =====================================================================
+# PERMISOS (token de cliente)
+# =====================================================================
+
+### 40 Cliente: GET /multas -> 403
+GET {{host}}/api/prestamos/multas?page=0&size=10
+Authorization: Bearer {{tokenA}}
+
+> {%
+client.test("cliente 403", function () { client.assert(response.status === 403, "status " + response.status); });
+%}
+
+### 41 Cliente: GET /multas/mias -> 200
+GET {{host}}/api/prestamos/multas/mias?page=0&size=10
+Authorization: Bearer {{tokenA}}
+
+> {%
+client.test("cliente /mias 200", function () { client.assert(response.status === 200, "status " + response.status); });
+%}
+
+
+# =====================================================================
+# RESERVAS - vencimiento (el UPDATE de reservas ya se corrió)
+# =====================================================================
+
+### 50 B Vencida y C Confirmada  [ejecútalo SOLO con ▶, 60+ s después del UPDATE de reservas]
+GET {{host}}/api/reservas?libroId={{libroR}}&page=0&size=50
+Authorization: Bearer {{tokenStaff}}
+
+> {%
+client.test("B Vencida y C Confirmada", function () {
+  const b = response.body.contenido.find(x => String(x.reservaId) === String(client.global.get("rB2")));
+  const c = response.body.contenido.find(x => String(x.reservaId) === String(client.global.get("rC2")));
+  client.assert(b && b.estado === "Vencida", "B estado " + (b ? b.estado : "no encontrada") + " (¿corriste el UPDATE de reservas? ¿@EnableScheduling?)");
+  client.assert(c && c.estado === "Confirmada", "C estado " + (c ? c.estado : "no encontrada"));
+});
+%}
