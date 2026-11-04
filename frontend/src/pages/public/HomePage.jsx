@@ -1,9 +1,10 @@
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { ArrowRight, BookOpen, ShieldCheck, Truck, LibraryBig } from "lucide-react";
 import Navbar from "../../components/layout/Navbar";
 import BookCard from "../../components/books/BookCard";
 
-import { books } from "../../data/books";
+import { obtenerLibros } from "../../services/catalogo";
 
 const categories = [
   { name: "Literatura", emoji: "📖" },
@@ -15,6 +16,16 @@ const categories = [
 ];
 
 export default function HomePage() {
+  const [books, setBooks] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    obtenerLibros()
+      .then((data) => { if (active) setBooks(data); })
+      .catch((error) => console.error("Error al cargar libros destacados:", error));
+    return () => { active = false; };
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#F8F6F1]">
       <Navbar />
