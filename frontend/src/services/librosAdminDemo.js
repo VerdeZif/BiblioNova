@@ -3,13 +3,26 @@ import { books } from "../data/books";
 
 const STORAGE_KEY = "biblionova_libros_admin_demo";
 
-function librosIniciales() {
-  return books.map((book) => ({
+function normalizarLibro(book) {
+  return {
     ...book,
-    stockVenta: book.stockVenta ?? 10,
-    stockPrestamo: book.loanable ? 5 : 0,
+    stockVenta:
+      book.stockVenta == null
+        ? 10
+        : Number(book.stockVenta),
+
+    stockPrestamo:
+      book.stockPrestamo == null
+        ? (book.loanable ? 5 : 0)
+        : Number(book.stockPrestamo),
+
     saleable: book.saleable !== false,
-  }));
+    loanable: book.loanable === true,
+  };
+}
+
+function librosIniciales() {
+  return books.map(normalizarLibro);
 }
 
 export function obtenerLibrosAdminDemo() {
@@ -18,14 +31,32 @@ export function obtenerLibrosAdminDemo() {
 
     if (guardados !== null) {
       const libros = JSON.parse(guardados);
-      return Array.isArray(libros) ? libros : librosIniciales();
+
+      if (Array.isArray(libros)) {
+        const normalizados = libros.map(normalizarLibro);
+
+        // Actualizar registros antiguos sin perder cambios.
+            if (JSON.stringify(libros) !== JSON.stringify(normalizados)) {
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(normalizados)
+  );
+}
+
+return normalizados;
+      }
     }
-  } catch {
-    // Si los datos están dañados, recuperamos el catálogo inicial.
+  } catch (error) {
+    console.error("Error al cargar libros:", error);
   }
 
   const iniciales = librosIniciales();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(iniciales));
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(iniciales)
+  );
+
   return iniciales;
 }
 

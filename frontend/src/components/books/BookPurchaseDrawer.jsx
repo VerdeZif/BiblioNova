@@ -20,15 +20,16 @@ export default function BookPurchaseDrawer({ book, onClose }) {
   const [quantity, setQuantity] = useState(1);
   const [confirmed, setConfirmed] = useState(false);
 
-  const alreadyInCart =
-    items.find((item) => item.id === book.id)?.quantity || 0;
+  const alreadyInCart = items
+  .filter((item) => String(item.id) === String(book.id))
+  .reduce(
+    (total, item) => total + Number(item.quantity || 0),
+    0
+  );
 
-  const stock = Number(book.stockVenta ?? 99);
+const stock = Math.max(0, Number(book.stockVenta ?? 0));
 
-const available = Math.max(
-  0,
-  stock - alreadyInCart
-);
+const available = Math.max(0, stock - alreadyInCart);
 
 const subtotal = book.price * quantity;
 
@@ -181,9 +182,9 @@ const canConfirm =
               <Package size={18} className="text-[#3D7669]" />
               <span className="text-slate-500">Disponibilidad:</span>
               <span className="ml-auto font-medium text-[#3D7669]">
-                {available > 0
-                  ? `${available} disponibles`
-                  : "Sin stock"}
+                {stock > 0
+  ? `${stock} ejemplares en inventario`
+  : "Sin stock"}
               </span>
             </div>
 

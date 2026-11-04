@@ -46,7 +46,6 @@ export default function AppRoutes() {
         <Route path="/mis-pedidos" element={<MyOrdersPage />} />
         <Route path="/mis-pedidos/:id" element={<OrderDetailPage />} />
         <Route path="/mis-prestamos" element={<MyLoansPage />} />
-        <Route path="inventario" element={<AdminInventoryPage />} />
 <Route
   path="/bibliotecario"
   element={<BibliotecarioLayout />}
@@ -64,7 +63,7 @@ export default function AppRoutes() {
   <Route path="libros" element={<AdminBooksPage />} />
 
   <Route path="pedidos" element={<AdminOrdersPage />} />
-
+<Route path="inventario" element={<AdminInventoryPage />} />
 
   <Route
     path="usuarios"
@@ -77,8 +76,7 @@ export default function AppRoutes() {
         <Route path="/registro" element={<RegisterPage />} />
         {/* Clientes */}
         <Route path="/mi-cuenta" element={<Placeholder title="Mi cuenta" />} />
-        <Route path="/mis-pedidos" element={<Placeholder title="Mis pedidos" />} />
-        <Route path="/mis-prestamos" element={<Placeholder title="Mis préstamos" />} />
+       
 
                 
         {/* Página no encontrada */}
