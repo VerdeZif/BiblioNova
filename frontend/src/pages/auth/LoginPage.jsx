@@ -3,6 +3,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { iniciarSesion } from "../../services/api";
+import { iniciarSesionDemo } from "../../services/usuariosDemo";
+import { USE_MOCKS } from "../../services/catalogo";
 import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 import AuthLayout from "../../components/auth/AuthLayout";
 
@@ -34,9 +36,11 @@ export default function LoginPage() {
     setLoading(true);
     setMessage("");
     try {
-      const data = await iniciarSesion(form.usuario.trim(), form.password);
+      const data = USE_MOCKS
+        ? iniciarSesionDemo(form.usuario.trim(), form.password)
+        : await iniciarSesion(form.usuario.trim(), form.password);
       const rol = data.usuario.rol?.toLowerCase();
-      navigate(rol === "cliente" ? "/catalogo" : "/admin", { replace: true });
+      navigate(rol === "cliente" ? "/catalogo" : rol === "bibliotecario" ? "/bibliotecario" : "/admin", { replace: true });
     } catch (error) {
       if (axios.isAxiosError(error)) {
         setMessage(error.response?.status === 401
@@ -55,6 +59,7 @@ export default function LoginPage() {
       title="Bienvenido de nuevo"
       subtitle="Ingresa tus datos para acceder a tu cuenta."
     >
+      {USE_MOCKS && <div className="mb-5 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-900"><strong>Acceso de demostración:</strong> usuarios admin, bibliotecario o cliente. Contraseña para todos: <code>demo1234</code>. Sin autenticación real.</div>}
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label htmlFor="login-usuario" className="mb-2 block text-sm font-semibold text-slate-700">
