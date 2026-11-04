@@ -1,3 +1,6 @@
+import { obtenerLibrosAdminDemo } from "./librosAdminDemo";
+
+const INVENTARIO_KEY = "biblionova_libros_admin_demo";
 
 const STORAGE_KEY = "biblionova_prestamos_demo";
 
@@ -11,7 +14,8 @@ export function obtenerPrestamosDemo() {
 }
 
 export function solicitarPrestamoDemo(book) {
-  if (!book.loanable) {
+  const libroActual = obtenerLibrosAdminDemo().find((libro) => String(libro.id) === String(book.id));
+  if (!libroActual?.loanable || Number(libroActual.stockPrestamo) <= 0) {
     throw new Error("Este libro no está disponible para préstamo.");
   }
 
@@ -19,8 +23,8 @@ export function solicitarPrestamoDemo(book) {
 
   const existe = prestamos.some(
     (prestamo) =>
-      prestamo.libroId === book.id &&
-      prestamo.estado === "Pendiente"
+      String(prestamo.libroId) === String(book.id) &&
+      ["Pendiente", "Aprobado"].includes(prestamo.estado)
   );
 
   if (existe) {
@@ -78,20 +82,43 @@ export function cambiarEstadoPrestamoDemo(id, nuevoEstado) {
     throw new Error("Cambio de estado no permitido.");
   }
 
+  const libros = obtenerLibrosAdminDemo();
+  const libro = libros.find((item) => String(item.id) === String(prestamo.libroId));
+  const descontar = nuevoEstado === "Aprobado";
+  const reponer = nuevoEstado === "Devuelto" && prestamo.stockDescontado === true;
+
+  if (descontar && (!libro?.loanable || Number(libro.stockPrestamo) <= 0)) {
+    throw new Error("No quedan ejemplares disponibles para préstamo.");
+  }
+
   const actualizados = prestamos.map((item) =>
     item.id === id
       ? {
           ...item,
           estado: nuevoEstado,
           fechaActualizacion: new Date().toISOString(),
+          stockDescontado: descontar ? true : reponer ? false : item.stockDescontado,
         }
       : item
   );
 
-  localStorage.setItem(
-    "biblionova_prestamos_demo",
-    JSON.stringify(actualizados)
-  );
+  if ((descontar || reponer) && libro) {
+    const inventarioActualizado = libros.map((item) =>
+      String(item.id) === String(libro.id)
+        ? { ...item, stockPrestamo: Number(item.stockPrestamo) + (descontar ? -1 : 1) }
+        : item
+    );
+    localStorage.setItem(INVENTARIO_KEY, JSON.stringify(inventarioActualizado));
+  }
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(actualizados));
+  } catch (error) {
+    if (descontar || reponer) {
+      localStorage.setItem(INVENTARIO_KEY, JSON.stringify(libros));
+    }
+    throw error;
+  }
 
   return actualizados;
 }
