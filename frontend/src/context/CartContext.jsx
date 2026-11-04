@@ -1,3 +1,5 @@
+import { obtenerLibrosAdminDemo } from "../services/librosAdminDemo";
+
 import {
   createContext,
   useContext,
@@ -35,7 +37,7 @@ const addToCart = (book, quantity = 1) => {
   // Declaramos stock ANTES de utilizarlo
   const stock = Math.max(
     0,
-    Number(book.stockVenta ?? 99)
+    Number(obtenerLibrosAdminDemo().find((libro) => String(libro.id) === String(book.id))?.stockVenta ?? 0)
   );
 
   setItems((current) => {
@@ -98,7 +100,7 @@ item.id === id
       ...item,
       quantity: Math.min(
         amount,
-        Math.max(0, Number(item.stockVenta ?? 99))
+        Math.max(0, Number(obtenerLibrosAdminDemo().find((libro) => String(libro.id) === String(item.id))?.stockVenta ?? 0))
       ),
     }
   : item
