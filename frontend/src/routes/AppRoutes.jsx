@@ -18,6 +18,7 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 import AdminBooksPage from "../pages/admin/AdminBooksPage";
 import AdminOrdersPage from "../pages/admin/AdminOrdersPage";
 import AdminInventoryPage from "../pages/admin/AdminInventoryPage";
+import AdminUsersPage from "../pages/admin/AdminUsersPage";
 
 function Placeholder({ title }) {
   return (
@@ -67,7 +68,7 @@ export default function AppRoutes() {
 
   <Route
     path="usuarios"
-    element={<Placeholder title="Gestión de usuarios" />}
+    element={<AdminUsersPage />}
   />
 </Route>
 
