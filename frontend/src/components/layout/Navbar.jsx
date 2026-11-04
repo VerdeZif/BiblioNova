@@ -21,13 +21,28 @@ export default function Navbar() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-7 text-sm md:flex">
-          <NavLink to="/" end className={navClass}>Inicio</NavLink>
-          <NavLink to="/catalogo" className={navClass}>Catálogo</NavLink>
-          <NavLink to="/mis-prestamos" className={navClass}>Préstamos</NavLink>
-        </nav>
+        
+<nav className="hidden items-center gap-7 text-sm md:flex">
+  <NavLink to="/" end className={navClass}>
+    Inicio
+  </NavLink>
+
+  <NavLink to="/catalogo" className={navClass}>
+    Catálogo
+  </NavLink>
+
+  <NavLink to="/mis-prestamos" className={navClass}>
+    Préstamos
+  </NavLink>
+
+  <NavLink to="/mis-pedidos" className={navClass}>
+    Mis pedidos
+  </NavLink>
+</nav>
+
 
         <div className="flex items-center gap-3">
+          
           <Link
             to="/catalogo"
             aria-label="Buscar libros"
@@ -42,6 +57,7 @@ export default function Navbar() {
   aria-label={`Carrito de compras, ${totalItems} productos`}
   className="relative inline-flex items-center justify-center rounded-lg p-2 text-slate-600 transition hover:bg-stone-200"
 >
+  
   <ShoppingBag size={22} />
 
   {totalItems > 0 && (

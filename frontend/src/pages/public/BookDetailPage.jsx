@@ -1,4 +1,4 @@
-    
+import { solicitarPrestamoDemo } from "../../services/prestamosDemo";   
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, BookOpen, Minus, Plus, ShoppingBag } from "lucide-react";
@@ -21,10 +21,12 @@ export default function BookDetailPage() {
     return () => { active = false; };
   }, [id]);
 
-  const [quantity, setQuantity] = useState(1);
-  const [added, setAdded] = useState(false);
-  const { addToCart } = useCart();
+ const [quantity, setQuantity] = useState(1);
+const [added, setAdded] = useState(false);
+const [loanMessage, setLoanMessage] = useState("");
+const [loanError, setLoanError] = useState("");
 
+const { addToCart } = useCart();
   if (loading || !book) {
     return (
       <div className="min-h-screen bg-[#F8F6F1]">
@@ -41,10 +43,28 @@ export default function BookDetailPage() {
     );
   }
 
+
   const handleAdd = () => {
     if (book.saleable === false) return;
+
     addToCart(book, quantity);
     setAdded(true);
+  };
+
+  const handleLoan = () => {
+    setLoanMessage("");
+    setLoanError("");
+
+    try {
+      solicitarPrestamoDemo(book);
+      setLoanMessage(
+        "Solicitud de préstamo registrada correctamente."
+      );
+    } catch (err) {
+      setLoanError(
+        err.message || "No se pudo solicitar el préstamo."
+      );
+    }
   };
 
   return (
@@ -132,6 +152,32 @@ export default function BookDetailPage() {
               <ShoppingBag size={20} />
               Agregar al carrito
             </button>
+
+{book.loanable && (
+  <button
+    type="button"
+    onClick={handleLoan}
+    className="mt-3 flex items-center justify-center gap-2 rounded-xl border-2 border-[#3D7669] px-6 py-4 font-semibold text-[#3D7669] transition hover:bg-[#F0F7F4]"
+  >
+    <BookOpen size={20} />
+    Solicitar préstamo
+  </button>
+)}
+
+{loanMessage && (
+  <div role="status" className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800">
+    {loanMessage}{" "}
+    <Link to="/mis-prestamos" className="font-bold underline">
+      Ver mis préstamos
+    </Link>
+  </div>
+)}
+
+{loanError && (
+  <div role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-sm text-red-700">
+    {loanError}
+  </div>
+)}
 
             {added && (
               <div className="mt-4 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800">

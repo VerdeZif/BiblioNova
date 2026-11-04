@@ -40,3 +40,58 @@ export function obtenerPedidosDemo() {
     localStorage.getItem(STORAGE_KEY) || "[]"
   );
 }
+
+export const ESTADOS_PEDIDO_DEMO = [
+  "Pendiente de confirmación",
+  "Confirmado",
+  "En preparación",
+  "Listo para recoger",
+  "En camino",
+  "Entregado",
+  "Cancelado",
+];
+
+export function actualizarEstadoPedidoDemo(id, nuevoEstado) {
+  const pedidos = obtenerPedidosDemo();
+  const pedido = pedidos.find((p) => String(p.id) === String(id));
+
+  if (!pedido) {
+    throw new Error("Pedido no encontrado.");
+  }
+
+  const transiciones = {
+    "Pendiente de confirmación": ["Confirmado", "Cancelado"],
+    "Confirmado": ["En preparación", "Cancelado"],
+    "En preparación": [
+      pedido.cliente?.tipoEntrega === "delivery"
+        ? "En camino"
+        : "Listo para recoger",
+      "Cancelado",
+    ],
+    "Listo para recoger": ["Entregado"],
+    "En camino": ["Entregado"],
+    "Entregado": [],
+    "Cancelado": [],
+  };
+
+  if (!transiciones[pedido.estado]?.includes(nuevoEstado)) {
+    throw new Error("Cambio de estado no permitido.");
+  }
+
+  const actualizados = pedidos.map((p) =>
+    String(p.id) === String(id)
+      ? {
+          ...p,
+          estado: nuevoEstado,
+          fechaActualizacion: new Date().toISOString(),
+        }
+      : p
+  );
+
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(actualizados)
+  );
+
+  return actualizados;
+}
