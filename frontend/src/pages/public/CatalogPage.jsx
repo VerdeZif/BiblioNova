@@ -32,7 +32,7 @@ export default function CatalogPage() {
       searchParams.get("categoria") || "Todas"
   );
 
-  const [onlyLoans, setOnlyLoans] = useState(false);
+  const [availability, setAvailability] = useState("all");
   const [sortBy, setSortBy] = useState("default");
 
   // Sincronizar el filtro con la categoría recibida en la URL.
@@ -188,17 +188,23 @@ export default function CatalogPage() {
           category === "Todas" ||
           categoriaLibro === selectedCategory;
 
-      const matchesLoan =
-          !onlyLoans ||
-          (
-              book.loanable === true &&
-              Number(book.stockPrestamo ?? 0) > 0
-          );
+      const matchesAvailability =
+    availability === "all" ||
+    (
+        availability === "buy" &&
+        book.saleable === true &&
+        Number(book.stockVenta ?? 0) > 0
+    ) ||
+    (
+        availability === "loan" &&
+        book.loanable === true &&
+        Number(book.stockPrestamo ?? 0) > 0
+    );
 
       return (
           matchesSearch &&
           matchesCategory &&
-          matchesLoan
+          matchesAvailability
       );
     });
 
@@ -230,12 +236,12 @@ export default function CatalogPage() {
     }
 
     return ordered;
-  }, [books, search, category, onlyLoans, sortBy]);
+  }, [books, search, category, availability, sortBy]);
 
   // Limpiar todos los filtros.
   const clearFilters = () => {
     setSearch("");
-    setOnlyLoans(false);
+    setAvailability("all" );
     setSortBy("default");
     setCategory("Todas");
     setSearchParams({}, { replace: true });
@@ -248,8 +254,8 @@ export default function CatalogPage() {
         <main className="mx-auto max-w-7xl px-5 py-10">
 
           {/* ENCABEZADO */}
-          <section className="mb-9">
-                    <span className="text-sm font-semibold uppercase tracking-widest text-[#3D7669]">
+          <section className="mb-9 rounded-[1.75rem] border border-[#E6DFEB] bg-gradient-to-r from-[#F0EBF5] via-[#F3F1EC] to-[#E8EEE8] px-7 py-9 md:px-10 md:py-11">
+                    <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#67458B]">
                         Nuestra colección
                     </span>
 
@@ -279,8 +285,8 @@ export default function CatalogPage() {
           )}
 
           {/* FILTROS */}
-          <section className="rounded-2xl border border-stone-200 bg-white p-5 shadow-sm">
-            <div className="mb-5 flex items-center gap-2">
+          <section className="rounded-[1.5rem] border border-[#E5E0E8] bg-white p-6 shadow-sm md:p-7">
+            <div className="mb-6 flex items-center gap-3 border-b border-stone-100 pb-5">
               <SlidersHorizontal
                   size={19}
                   className="text-[#3D7669]"
@@ -398,37 +404,55 @@ export default function CatalogPage() {
               </div>
             </div>
 
-            <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-stone-100 pt-5">
-              <label className="flex cursor-pointer items-center gap-3 text-sm text-slate-700">
-                <input
-                    type="checkbox"
-                    checked={onlyLoans}
-                    onChange={(e) =>
-                        setOnlyLoans(e.target.checked)
-                    }
-                    className="h-4 w-4 accent-[#3D7669]"
-                />
+           
+<div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-stone-100 pt-5">
 
-                Solo libros disponibles para préstamo
-              </label>
+  {/* FILTRO DE DISPONIBILIDAD */}
+  <div className="flex flex-wrap items-center gap-3">
+    <label
+      htmlFor="book-availability"
+      className="text-sm font-medium text-slate-700"
+    >
+      Disponibilidad
+    </label>
 
-              <button
-                  type="button"
-                  onClick={clearFilters}
-                  className="flex items-center gap-2 text-sm font-medium text-[#3D7669] hover:underline"
-              >
-                <RotateCcw size={16} />
-                Limpiar filtros
-              </button>
-            </div>
-          </section>
+    <select
+      id="book-availability"
+      value={availability}
+      onChange={(e) => setAvailability(e.target.value)}
+      className="rounded-xl border border-stone-200 bg-[#FAF9F7] px-4 py-2.5 text-sm text-slate-700 outline-none transition focus:border-[#67458B] focus:ring-2 focus:ring-violet-100"
+    >
+      <option value="all">Todos los libros</option>
+      <option value="buy">Disponibles para compra</option>
+      <option value="loan">Disponibles para préstamo</option>
+    </select>
+  </div>
+
+  {/* LIMPIAR FILTROS */}
+  <button
+    type="button"
+    onClick={clearFilters}
+    className="flex items-center gap-2 text-sm font-medium text-[#3D7669] transition hover:text-[#67458B] hover:underline"
+  >
+    <RotateCcw size={16} />
+    Limpiar filtros
+  </button>
+
+</div>
+</section>
+
 
           {/* RESULTADOS */}
           <section className="py-10">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-slate-800">
-                Libros disponibles
-              </h2>
+              <div>
+  <h2 className="text-2xl font-bold tracking-tight text-slate-800">
+    Explorar libros
+  </h2>
+  <p className="mt-1 text-sm text-slate-500">
+    Encuentra tu próxima lectura favorita.
+  </p>
+</div>
 
               <span className="text-sm text-slate-500">
                             {loading ? "..." : `${filteredBooks.length} resultados`}

@@ -291,35 +291,44 @@ export default function BookDetailPage() {
             Volver al catálogo
           </Link>
 
-          <div className="grid gap-10 rounded-3xl bg-white p-6 shadow-sm md:grid-cols-2 md:p-10">
+          <div className="grid items-start gap-10 rounded-[2rem] border border-[#E8E2E9] bg-white p-6 shadow-sm lg:grid-cols-[0.9fr_1.1fr] lg:gap-12 lg:p-10">
 
             {/* PORTADA */}
-            <div className="flex items-center justify-center rounded-2xl bg-[#EEEDE7] p-8">
-              <img
-                  src={book.image || "/placeholder-book.svg"}
-                  alt={`Portada de ${book.title}`}
-                  className="max-h-[450px] w-auto object-contain shadow-xl"
-              />
-            </div>
+            <div className="flex min-h-[360px] items-center justify-center rounded-[1.5rem] border border-[#EBE5EC] bg-gradient-to-br from-[#F2EDF7] via-[#F8F6F1] to-[#E9EFEA] p-8 lg:min-h-[520px]">
+  <img
+    src={book.image || "/placeholder-book.svg"}
+    alt={`Portada de ${book.title}`}
+    className="max-h-[430px] w-full max-w-[310px] object-contain drop-shadow-2xl transition-transform duration-300 hover:scale-[1.03]"
+  />
+</div>
 
             {/* INFORMACIÓN DEL LIBRO */}
             <div className="flex flex-col justify-center">
-            <span className="text-sm font-semibold uppercase tracking-widest text-[#3D7669]">
-              {book.category || "Sin categoría"}
-            </span>
+            <div>
+  <span className="inline-flex rounded-full border border-[#E5D9EF] bg-[#F3EDF8] px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-[#67458B]">
+    {book.category || "Sin categoría"}
+  </span>
 
-              <h1 className="mt-3 text-4xl font-bold text-slate-800">
-                {book.title}
-              </h1>
+  <h1 className="mt-5 text-3xl font-bold leading-tight tracking-tight text-[#302346] sm:text-4xl">
+    {book.title}
+  </h1>
 
-              <p className="mt-3 text-lg text-slate-500">
-                {book.author || "Autor no especificado"}
-              </p>
+  <p className="mt-3 text-base text-slate-500">
+    Por <span className="font-medium text-slate-700">
+      {book.author || "Autor no especificado"}
+    </span>
+  </p>
+</div>
 
-              <p className="mt-7 text-4xl font-bold text-[#3D7669]">
-                S/ {Number(book.price ?? 0).toFixed(2)}
-              </p>
+              <div className="mt-7 rounded-2xl border border-[#E1EAE4] bg-[#F3F8F5] px-5 py-4">
+  <p className="text-xs font-semibold uppercase tracking-wider text-[#5C796E]">
+    Precio de venta
+  </p>
 
+  <p className="mt-1 text-3xl font-bold tracking-tight text-[#3D7669]">
+    S/ {Number(book.price ?? 0).toFixed(2)}
+  </p>
+</div>
               {/* INFORMACIÓN ADICIONAL */}
               <div className="mt-6 space-y-2 text-sm text-slate-600">
                 {book.editorial && (

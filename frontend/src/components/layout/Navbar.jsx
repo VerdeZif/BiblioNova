@@ -52,7 +52,7 @@ export default function Navbar() {
     const rutaPanel = obtenerRutaPanel();
 
     return (
-        <header className="sticky top-0 z-50 border-b border-stone-200 bg-[#F8F6F1]/95 backdrop-blur">
+        <header className="sticky top-0 z-50 border-b border-[#E8E3DC] bg-[#F8F6F1]/95 shadow-sm shadow-stone-900/5 backdrop-blur-xl">
             <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-5 py-4">
 
                 {/* LOGO */}
@@ -60,9 +60,11 @@ export default function Navbar() {
                     to="/"
                     className="flex items-center gap-2"
                 >
-                    <div className="rounded-xl bg-[#3D7669] p-2 text-white">
-                        <BookOpen size={23} />
-                    </div>
+                   <img
+  src="/BiblioNova.png"
+  alt="Logo de BiblioNova"
+  className="h-12 w-12 object-contain transition-transform duration-300 hover:scale-105"
+/>
 
                     <span className="text-xl font-bold tracking-tight text-slate-800">
             Biblio

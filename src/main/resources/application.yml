@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3307/biblionova?useSSL=false&serverTimezone=America/Lima
+    url: jdbc:mysql://localhost:3306/biblionova?useSSL=false&serverTimezone=America/Lima
     username: root
     password: ""
   jpa:
