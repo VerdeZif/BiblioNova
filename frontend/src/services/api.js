@@ -1,29 +1,166 @@
+
 import axios from "axios";
 
+const API_URL =
+    import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+
+const EVENTO_AUTH = "biblionova:auth-change";
+
+const CLAVE_TOKEN = "biblionova_token";
+const CLAVE_USUARIO = "biblionova_usuario";
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
+  baseURL: API_URL,
   timeout: 10000,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-api.interceptors.request.use((config) => {
-  const token = sessionStorage.getItem("biblionova_token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+// ----------------------------------------------------
+// SESIÓN
+// ----------------------------------------------------
 
-export async function iniciarSesion(usuario, contrasena) {
-  const { data } = await api.post("/auth/login", { usuario, contrasena });
-  if (!data?.token || !data?.usuario) {
-    throw new Error("La respuesta del servidor no contiene una sesión válida.");
+export function obtenerUsuarioGuardado() {
+  try {
+    const usuario = sessionStorage.getItem(CLAVE_USUARIO);
+
+    return usuario ? JSON.parse(usuario) : null;
+  } catch {
+    return null;
   }
-  sessionStorage.setItem("biblionova_token", data.token);
-  sessionStorage.setItem("biblionova_usuario", JSON.stringify(data.usuario));
-  return data;
+}
+
+export function guardarUsuario(usuario) {
+  if (!usuario) return;
+
+  sessionStorage.setItem(
+      CLAVE_USUARIO,
+      JSON.stringify(usuario)
+  );
+}
+
+function notificarCambioAuth() {
+  window.dispatchEvent(new Event(EVENTO_AUTH));
 }
 
 export function cerrarSesion() {
-  sessionStorage.removeItem("biblionova_token");
-  sessionStorage.removeItem("biblionova_usuario");
+  sessionStorage.removeItem(CLAVE_TOKEN);
+  sessionStorage.removeItem(CLAVE_USUARIO);
+
+  notificarCambioAuth();
+}
+
+// ----------------------------------------------------
+// INTERCEPTOR DE SOLICITUDES
+// ----------------------------------------------------
+
+api.interceptors.request.use(
+    (config) => {
+      const token = sessionStorage.getItem(CLAVE_TOKEN);
+
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+
+      return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+// ----------------------------------------------------
+// INTERCEPTOR DE RESPUESTAS
+// ----------------------------------------------------
+
+api.interceptors.response.use(
+    (respuesta) => respuesta,
+    (error) => {
+      const estado = error.response?.status;
+
+      const url = String(error.config?.url || "");
+
+      const esLogin = url.includes("/auth/login");
+      const esRegistro = url.includes("/auth/registro");
+
+      const tokenActual = sessionStorage.getItem(CLAVE_TOKEN);
+
+      // Solo cerramos la sesión cuando:
+      // 1. Ya existía un token.
+      // 2. El backend respondió 401.
+      // 3. No estamos intentando iniciar sesión o registrarnos.
+      if (
+          estado === 401 &&
+          tokenActual &&
+          !esLogin &&
+          !esRegistro
+      ) {
+        cerrarSesion();
+      }
+
+      // Un 403 significa falta de permisos, no necesariamente
+      // que la sesión haya expirado.
+      return Promise.reject(error);
+    }
+);
+
+// ----------------------------------------------------
+// AUTENTICACIÓN
+// ----------------------------------------------------
+
+export async function iniciarSesion(usuario, contrasena) {
+  const respuesta = await api.post("/auth/login", {
+    usuario,
+    contrasena,
+  });
+
+  const datos = respuesta.data;
+
+  if (!datos.token) {
+    throw new Error(
+        "El servidor no devolvió un token de autenticación."
+    );
+  }
+
+  sessionStorage.setItem(CLAVE_TOKEN, datos.token);
+
+  if (datos.usuario) {
+    guardarUsuario(datos.usuario);
+  } else {
+    sessionStorage.removeItem(CLAVE_USUARIO);
+  }
+
+  notificarCambioAuth();
+
+  return datos;
+}
+
+// ----------------------------------------------------
+// REGISTRO DE CLIENTES
+// ----------------------------------------------------
+
+export async function registrarCliente(datos) {
+  const respuesta = await api.post("/auth/registro", {
+    nombreUsuario: datos.nombreUsuario,
+    contrasena: datos.contrasena,
+    correo: datos.correo,
+    documento: datos.documento,
+    nombres: datos.nombres,
+    apellidos: datos.apellidos,
+    telefono: datos.telefono,
+    direccion: datos.direccion,
+  });
+
+  return respuesta.data;
+}
+
+// ----------------------------------------------------
+// USUARIO AUTENTICADO
+// ----------------------------------------------------
+
+export async function obtenerMiUsuario() {
+  const respuesta = await api.get("/auth/me");
+
+  return respuesta.data;
 }
 
 export default api;

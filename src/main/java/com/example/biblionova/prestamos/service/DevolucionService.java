@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DevolucionService {
 
+
     private final PrestamoRepository prestamoRepo;
     private final DetallePrestamoRepository detalleRepo;
     private final DevolucionRepository devolucionRepo;
@@ -48,7 +49,18 @@ public class DevolucionService {
 
     @Transactional
     public DevolucionResponse registrar(Integer prestamoId, DevolucionRequest r) {
+
+        // DIAGNÓSTICO 1: comprobar si la solicitud llega al servicio
+        System.out.println("========== INICIO DEVOLUCION ==========");
+        System.out.println("Prestamo ID: " + prestamoId);
+        System.out.println(
+                "Longitud de observaciones generales: " +
+                        (r.observaciones() == null ? 0 : r.observaciones().length())
+        );
+
         Usuario usuario = usuarioActual.obtener();
+
+        System.out.println("DIAGNÓSTICO 2: Usuario autenticado obtenido");
 
         Prestamo p = prestamoRepo.bloquearPorId(prestamoId)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Préstamo", prestamoId));
@@ -76,9 +88,14 @@ public class DevolucionService {
         dev.setUsuario(usuario);
         dev.setFechaDevolucion(ahora);
         dev.setObservaciones(r.observaciones());
-        devolucionRepo.save(dev);
-        dev.setCodigoDevolucion(Codigos.formatear("DEV", dev.getDevolucionId()));
 
+        System.out.println("DIAGNÓSTICO 3: Antes de guardar devolución");
+
+        devolucionRepo.save(dev);
+
+        System.out.println("DIAGNÓSTICO 4: Devolución guardada");
+
+        dev.setCodigoDevolucion(Codigos.formatear("DEV", dev.getDevolucionId()));
         Set<Integer> librosLiberados = new HashSet<>(); // <-- Acumulador de colas de reservas
         List<LineaDevolucionResponse> lineas = new ArrayList<>();
 
@@ -133,8 +150,21 @@ public class DevolucionService {
         // Disparador reactivo de colas asíncronas para el Scheduler de Reservas
         librosLiberados.forEach(id -> eventos.publishEvent(new EjemplarLiberadoEvent(id)));
 
-        p.setEstado(pendientes.size() - r.lineas().size() == 0 ? EstadoPrestamo.Devuelto : EstadoPrestamo.Parcial);
-        return new DevolucionResponse(dev.getDevolucionId(), dev.getCodigoDevolucion(), p.getPrestamoId(),
-                ahora, p.getEstado(), lineas);
+        p.setEstado(
+                pendientes.size() - r.lineas().size() == 0
+                        ? EstadoPrestamo.Devuelto
+                        : EstadoPrestamo.Parcial
+        );
+
+        System.out.println("DIAGNÓSTICO 5: Finalizó el procesamiento de devolución");
+
+        return new DevolucionResponse(
+                dev.getDevolucionId(),
+                dev.getCodigoDevolucion(),
+                p.getPrestamoId(),
+                ahora,
+                p.getEstado(),
+                lineas
+        );
     }
 }

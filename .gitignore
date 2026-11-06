@@ -1,0 +1,28 @@
+
+# IntelliJ IDEA
+.idea/
+
+# Java / Maven
+target/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/respaldo-demos/
+
+# Variables de entorno privadas
+.env
+.env.*
+!.env.example
+!frontend/.env.example
+
+
+# Archivos locales
+.idea/
+target/
+frontend/node_modules/
+frontend/dist/
+frontend/respaldo-demos/
+.env
+.env.*
+!.env.example

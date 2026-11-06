@@ -190,6 +190,86 @@ public class PrestamoService {
         return aResponse(p, detalles);
     }
 
+    /**
+     * Consulta únicamente los préstamos del cliente autenticado.
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<PrestamoResumen> misPrestamos(Pageable pageable) {
+
+        Usuario usuario = usuarioActual.obtener();
+
+        Lector lector = lectorRepo
+                .findByUsuario_UsuarioId(usuario.getUsuarioId())
+                .orElseThrow(() ->
+                        new RecursoNoEncontradoException(
+                                "Lector del usuario",
+                                usuario.getUsuarioId()
+                        )
+                );
+
+        LocalDate hoy = LocalDate.now();
+
+        return PageResponse.de(
+                prestamoRepo.findByLector_LectorId(
+                        lector.getLectorId(),
+                        sanear(pageable)
+                ).map(p -> new PrestamoResumen(
+                        p.getPrestamoId(),
+                        p.getCodigoPrestamo(),
+                        new ItemRef(
+                                p.getLector().getLectorId(),
+                                p.getLector().getNombreCompleto()
+                        ),
+                        p.getFechaPrestamo(),
+                        p.getFechaVencimiento(),
+                        p.getEstado(),
+                        p.estaPendiente() && p.diasRetraso(hoy) > 0
+                ))
+        );
+    }
+
+    /**
+     * Consulta el detalle únicamente si pertenece al cliente.
+     */
+    @Transactional(readOnly = true)
+    public PrestamoResponse obtenerMiPrestamo(Integer prestamoId) {
+
+        Usuario usuario = usuarioActual.obtener();
+
+        Lector lector = lectorRepo
+                .findByUsuario_UsuarioId(usuario.getUsuarioId())
+                .orElseThrow(() ->
+                        new RecursoNoEncontradoException(
+                                "Lector del usuario",
+                                usuario.getUsuarioId()
+                        )
+                );
+
+        Prestamo prestamo = prestamoRepo
+                .findWithDetalleByPrestamoId(prestamoId)
+                .orElseThrow(() ->
+                        new RecursoNoEncontradoException(
+                                "Préstamo",
+                                prestamoId
+                        )
+                );
+
+        // Evita consultar préstamos de otros lectores.
+        if (!prestamo.getLector().getLectorId()
+                .equals(lector.getLectorId())) {
+
+            throw new RecursoNoEncontradoException(
+                    "Préstamo",
+                    prestamoId
+            );
+        }
+
+        return aResponse(
+                prestamo,
+                detalleRepo.porPrestamo(prestamoId)
+        );
+    }
+
     private Pageable sanear(Pageable p) {
         int size = Math.min(p.getPageSize(), 50);
         Sort sort = Sort.by(p.getSort().stream().filter(o -> ORDEN_PERMITIDO.contains(o.getProperty())).toList());

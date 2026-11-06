@@ -43,3 +43,8 @@ app:
     max-pedidos-pendientes: 3    # evita acaparar stock sin comprar
   pagos:
     simulacion-habilitada: true
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.authorization: TRACE
