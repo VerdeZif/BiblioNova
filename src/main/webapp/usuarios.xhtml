@@ -1,0 +1,1040 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1"/>
+
+    <title>
+        Gestión de usuarios | Universidad Tecnológica XYZ
+    </title>
+
+    <style>
+        :root {
+            --granate: #69091F;
+            --granate-oscuro: #490917;
+            --granate-claro: #851733;
+            --dorado: #C99B29;
+            --dorado-claro: #F4E8C5;
+            --fondo: #F8F5F1;
+            --blanco: #FFFFFF;
+            --texto: #262329;
+            --secundario: #69636A;
+            --borde: #E9E3DF;
+            --error: #B42335;
+            --exito: #23764B;
+            --sombra: 0 8px 30px rgba(55, 25, 30, .06);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: var(--fondo);
+            color: var(--texto);
+            font-family: "Segoe UI", Arial, sans-serif;
+            line-height: 1.5;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        input, button {
+            font: inherit;
+        }
+
+        .top-accent {
+            height: 5px;
+            background: var(--dorado);
+        }
+
+        /* ENCABEZADO */
+
+        .header {
+            background: var(--blanco);
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .header-inner {
+            max-width: 1240px;
+            margin: auto;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            min-width: 0;
+        }
+
+        .brand-logo {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .brand-title {
+            font-size: 17px;
+            font-weight: 750;
+            color: var(--granate);
+            line-height: 1.3;
+        }
+
+        .brand-subtitle {
+            display: block;
+            margin-top: 4px;
+            color: var(--secundario);
+            font-size: 12px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            font-size: 13px;
+            color: var(--secundario);
+            text-align: right;
+        }
+
+        .user-info strong {
+            display: block;
+            color: var(--granate);
+            font-size: 15px;
+        }
+
+        .logout {
+            background: white;
+            border: 1px solid var(--granate);
+            color: var(--granate);
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .logout:hover {
+            background: var(--granate);
+            color: white;
+        }
+
+        /* NAVEGACIÓN */
+
+        .navigation {
+            background: var(--granate);
+        }
+
+        .nav-inner {
+            max-width: 1240px;
+            margin: auto;
+            padding: 0 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+        }
+
+        .nav-inner a {
+            display: inline-block;
+            padding: 15px 14px;
+            color: white;
+            font-size: 13px;
+            font-weight: 650;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+
+        .nav-inner a:hover {
+            background: var(--granate-claro);
+        }
+
+        .nav-inner .active {
+            background: rgba(255,255,255,.08);
+            border-bottom-color: var(--dorado);
+        }
+
+        /* CONTENIDO */
+
+        .container {
+            max-width: 1240px;
+            width: calc(100% - 48px);
+            margin: 35px auto 60px;
+        }
+
+        .breadcrumb {
+            color: var(--secundario);
+            font-size: 13px;
+            margin-bottom: 18px;
+        }
+
+        .breadcrumb a {
+            color: var(--granate);
+            font-weight: 650;
+        }
+
+        .page-heading {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .page-icon {
+            width: 55px;
+            height: 55px;
+            background: var(--dorado-claro);
+            border-radius: 12px;
+            color: var(--granate);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .page-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .page-heading h1 {
+            margin: 0 0 4px;
+            color: var(--granate);
+            font-size: 28px;
+            line-height: 1.25;
+        }
+
+        .page-heading p {
+            margin: 0;
+            color: var(--secundario);
+            font-size: 14px;
+        }
+
+        /* TARJETAS */
+
+        .card {
+            background: white;
+            border: 1px solid var(--borde);
+            border-radius: 14px;
+            box-shadow: var(--sombra);
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .card-header {
+            padding: 22px 28px;
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .card-header h2 {
+            color: var(--granate);
+            font-size: 19px;
+            margin: 0;
+        }
+
+        .card-header p {
+            margin: 5px 0 0;
+            color: var(--secundario);
+            font-size: 13px;
+        }
+
+        .card-body {
+            padding: 28px;
+        }
+
+        /* INFORMACIÓN */
+
+        .notice {
+            display: flex;
+            gap: 13px;
+            align-items: flex-start;
+            background: #FBF6E8;
+            border: 1px solid #EBDDAD;
+            border-left: 4px solid var(--dorado);
+            border-radius: 9px;
+            padding: 17px 19px;
+            margin-bottom: 27px;
+        }
+
+        .notice-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: var(--dorado-claro);
+            color: var(--granate);
+            font-weight: 800;
+            width: 27px;
+            height: 27px;
+            border-radius: 50%;
+        }
+
+        .notice strong {
+            display: block;
+            color: var(--granate);
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .notice p {
+            margin: 0;
+            color: #65563B;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* FORMULARIO */
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 22px 24px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 0;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        .field label {
+            color: var(--texto);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .input {
+            width: 100%;
+            min-height: 46px;
+            padding: 12px 14px;
+            border: 1px solid #D9D0D1;
+            border-radius: 9px;
+            color: var(--texto);
+            background: white;
+            font-size: 14px;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--granate);
+            box-shadow: 0 0 0 3px rgba(105,9,31,.10);
+        }
+
+        .input::placeholder {
+            color: #978C90;
+        }
+
+        .help {
+            color: var(--secundario);
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .field-error {
+            color: var(--error);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .form-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding-top: 22px;
+            margin-top: 27px;
+            border-top: 1px solid var(--borde);
+        }
+
+        .btn-primary {
+            padding: 13px 24px;
+            border: 1px solid var(--granate);
+            border-radius: 9px;
+            background: var(--granate);
+            color: white;
+            font-size: 14px;
+            font-weight: 750;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .btn-primary:hover {
+            background: var(--granate-claro);
+        }
+
+        .btn-primary:focus-visible,
+        .logout:focus-visible {
+            outline: 3px solid var(--dorado);
+            outline-offset: 3px;
+        }
+
+        .message {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--granate);
+            line-height: 1.6;
+        }
+
+        /* TABLA */
+
+        .table-container {
+            overflow-x: auto;
+            width: 100%;
+            scrollbar-width: thin;
+        }
+
+        .data-table {
+            width: 100%;
+            min-width: 820px;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .data-table th {
+            padding: 15px 17px;
+            text-align: left;
+            white-space: nowrap;
+            color: var(--granate);
+            background: #F5EEE8;
+            border-bottom: 2px solid var(--dorado);
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .data-table td {
+            padding: 15px 17px;
+            text-align: left;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--borde);
+            overflow-wrap: anywhere;
+        }
+
+        .data-table tbody tr:nth-child(even) {
+            background: #FDFBF9;
+        }
+
+        .data-table tbody tr:hover {
+            background: #FAF3EF;
+        }
+
+        .user-code {
+            font-weight: 750;
+            color: var(--granate);
+        }
+
+        .user-name {
+            font-weight: 650;
+        }
+
+        .user-email {
+            color: var(--secundario);
+            overflow-wrap: anywhere;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 11px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 750;
+        }
+
+        .status-active {
+            background: #E4F5EB;
+            color: #206C43;
+        }
+
+        .status-inactive {
+            background: #FCE8EA;
+            color: #A12839;
+        }
+
+        .table-note {
+            border-top: 1px solid var(--borde);
+            padding: 16px 25px;
+            color: var(--secundario);
+            font-size: 12px;
+        }
+
+        /* ACCESOS RÁPIDOS */
+
+        .quick-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .quick-links a {
+            display: inline-block;
+            padding: 11px 17px;
+            border: 1px solid #D9C6C9;
+            border-radius: 9px;
+            background: white;
+            color: var(--granate);
+            font-size: 13px;
+            font-weight: 700;
+            transition: .2s;
+        }
+
+        .quick-links a:hover {
+            background: #FBF5F6;
+            border-color: var(--granate);
+        }
+
+        /* PIE DE PÁGINA */
+
+        .footer {
+            padding: 23px 16px;
+            background: white;
+            border-top: 1px solid var(--borde);
+            text-align: center;
+            color: var(--secundario);
+            font-size: 12px;
+        }
+
+        .footer strong {
+            color: var(--granate);
+        }
+
+        /* TABLET */
+
+        @media (max-width: 850px) {
+            .header-inner {
+                padding: 12px 18px;
+            }
+
+            .brand-logo {
+                width: 75px;
+                height: 75px;
+            }
+        }
+
+        /* CELULARES */
+
+        @media (max-width: 650px) {
+            .header-inner {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .brand-logo {
+                width: 65px;
+                height: 65px;
+            }
+
+            .brand-title {
+                font-size: 14px;
+            }
+
+            .header-actions {
+                justify-content: space-between;
+                padding-top: 12px;
+                border-top: 1px solid var(--borde);
+            }
+
+            .user-info {
+                text-align: left;
+            }
+
+            .nav-inner {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding: 0 9px;
+                scrollbar-width: thin;
+            }
+
+            .nav-inner a {
+                padding: 13px 12px;
+                font-size: 12px;
+            }
+
+            .container {
+                width: calc(100% - 28px);
+                margin-top: 22px;
+            }
+
+            .page-heading h1 {
+                font-size: 23px;
+            }
+
+            .page-icon {
+                width: 46px;
+                height: 46px;
+            }
+
+            .card-header {
+                padding: 19px;
+            }
+
+            .card-body {
+                padding: 19px;
+            }
+
+            .notice {
+                padding: 15px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 18px;
+            }
+
+            .field.full {
+                grid-column: auto;
+            }
+
+            .input {
+                font-size: 16px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-primary {
+                width: 100%;
+            }
+
+            .quick-links {
+                flex-direction: column;
+            }
+
+            .quick-links a {
+                text-align: center;
+            }
+        }
+    </style>
+</h:head>
+
+<h:body>
+
+    <div class="top-accent"></div>
+
+    <!-- ENCABEZADO INSTITUCIONAL -->
+    <header class="header">
+
+        <div class="header-inner">
+
+            <div class="brand">
+
+                <img
+                        src="#{facesContext.externalContext.requestContextPath}/resources/img/logo-universidad-xyz.png"
+                        class="brand-logo"
+                        alt="Logo de la Universidad Tecnológica XYZ"/>
+
+                <div>
+                    <div class="brand-title">
+                        Universidad Tecnológica XYZ
+                    </div>
+
+                    <span class="brand-subtitle">
+                        Sistema de Gestión Bibliotecaria
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="header-actions">
+
+                <div class="user-info">
+                    Sesión iniciada como
+                    <strong>
+                        <h:outputText
+                                value="#{loginBean.usuarioAutenticado}"/>
+                    </strong>
+                </div>
+
+                <h:form>
+                    <h:commandButton
+                            value="Cerrar sesión"
+                            action="#{loginBean.cerrarSesion}"
+                            styleClass="logout"/>
+                </h:form>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    <!-- NAVEGACIÓN PRINCIPAL -->
+    <nav class="navigation"
+         aria-label="Navegación principal">
+
+        <div class="nav-inner">
+
+            <h:link outcome="/index.xhtml"
+                    value="Inicio"/>
+
+            <h:link outcome="/libros.xhtml"
+                    value="Libros"/>
+
+            <h:link outcome="/ejemplares.xhtml"
+                    value="Ejemplares"/>
+
+            <h:link outcome="/prestamos.xhtml"
+                    value="Préstamos"/>
+
+            <h:link outcome="/devoluciones.xhtml"
+                    value="Devoluciones"/>
+
+            <h:link outcome="/reportes.xhtml"
+                    value="Reportes"/>
+
+            <h:link outcome="/usuarios.xhtml"
+                    value="Usuarios"
+                    styleClass="active"/>
+
+            <h:link outcome="/mis-roles.xhtml"
+                    value="Mi perfil"/>
+
+        </div>
+
+    </nav>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="container">
+
+        <div class="breadcrumb">
+            <h:link outcome="/index.xhtml"
+                    value="Inicio"/>
+            / Gestión de usuarios
+        </div>
+
+        <div class="page-heading">
+
+            <div class="page-icon">
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.8"
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     aria-hidden="true">
+
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+
+                    <circle cx="9" cy="7" r="4"/>
+
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+
+                </svg>
+
+            </div>
+
+            <div>
+                <h1>Gestión de usuarios universitarios</h1>
+
+                <p>
+                    Registro y administración de los usuarios
+                    de la biblioteca institucional.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- FORMULARIO DE REGISTRO -->
+        <section class="card">
+
+            <div class="card-header">
+
+                <h2>Registrar nuevo usuario</h2>
+
+                <p>
+                    Completa la información del usuario
+                    para incorporarlo al sistema bibliotecario.
+                </p>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="notice">
+
+                    <div class="notice-icon">i</div>
+
+                    <div>
+                        <strong>Validación de datos institucionales</strong>
+
+                        <p>
+                            El código universitario y el correo
+                            electrónico deben cumplir con los
+                            formatos establecidos. Todos los
+                            campos del formulario son obligatorios.
+                        </p>
+                    </div>
+
+                </div>
+
+                <h:form id="formUsuario">
+
+                    <div class="form-grid">
+
+                        <!-- CÓDIGO UNIVERSITARIO -->
+                        <div class="field full">
+
+                            <h:outputLabel
+                                    for="codigo"
+                                    value="Código universitario *"/>
+
+                            <h:inputText
+                                    id="codigo"
+                                    value="#{usuarioBean.usuario.codigo}"
+                                    required="true"
+                                    requiredMessage="El código es obligatorio."
+                                    maxlength="20"
+                                    styleClass="input">
+
+                                <f:validator
+                                        validatorId="codigoUniversitarioValidator"/>
+
+                            </h:inputText>
+
+                            <span class="help">
+                                Identificador universitario del usuario.
+                                Se verificará mediante el validador
+                                personalizado del sistema.
+                            </span>
+
+                            <h:message
+                                    for="codigo"
+                                    styleClass="field-error"/>
+
+                        </div>
+
+                        <!-- NOMBRES -->
+                        <div class="field">
+
+                            <h:outputLabel
+                                    for="nombres"
+                                    value="Nombres *"/>
+
+                            <h:inputText
+                                    id="nombres"
+                                    value="#{usuarioBean.usuario.nombres}"
+                                    required="true"
+                                    requiredMessage="Los nombres son obligatorios."
+                                    styleClass="input"/>
+
+                            <h:message
+                                    for="nombres"
+                                    styleClass="field-error"/>
+
+                        </div>
+
+                        <!-- APELLIDOS -->
+                        <div class="field">
+
+                            <h:outputLabel
+                                    for="apellidos"
+                                    value="Apellidos *"/>
+
+                            <h:inputText
+                                    id="apellidos"
+                                    value="#{usuarioBean.usuario.apellidos}"
+                                    required="true"
+                                    requiredMessage="Los apellidos son obligatorios."
+                                    styleClass="input"/>
+
+                            <h:message
+                                    for="apellidos"
+                                    styleClass="field-error"/>
+
+                        </div>
+
+                        <!-- CORREO ELECTRÓNICO -->
+                        <div class="field full">
+
+                            <h:outputLabel
+                                    for="correo"
+                                    value="Correo electrónico *"/>
+
+                            <h:inputText
+                                    id="correo"
+                                    value="#{usuarioBean.usuario.correo}"
+                                    required="true"
+                                    requiredMessage="El correo es obligatorio."
+                                    styleClass="input">
+
+                                <f:validateRegex
+                                        pattern="[^@ ]+@[^@ ]+\.[^@ ]+"/>
+
+                            </h:inputText>
+
+                            <span class="help">
+                                Ingresa una dirección de correo
+                                electrónico válida.
+                            </span>
+
+                            <h:message
+                                    for="correo"
+                                    styleClass="field-error"/>
+
+                        </div>
+
+                    </div>
+
+                    <div class="form-actions">
+
+                        <h:commandButton
+                                value="Registrar usuario"
+                                action="#{usuarioBean.guardar}"
+                                styleClass="btn-primary"/>
+
+                        <h:outputText
+                                value="#{usuarioBean.mensaje}"
+                                styleClass="message"
+                                rendered="#{not empty usuarioBean.mensaje}"/>
+
+                    </div>
+
+                </h:form>
+
+            </div>
+
+        </section>
+
+        <!-- LISTADO DE USUARIOS -->
+        <section class="card">
+
+            <div class="card-header">
+
+                <h2>Usuarios registrados</h2>
+
+                <p>
+                    Consulta los datos de identificación,
+                    contacto y estado de los usuarios.
+                </p>
+
+            </div>
+
+            <div class="table-container">
+
+                <h:dataTable
+                        value="#{usuarioBean.usuarios}"
+                        var="usuario"
+                        styleClass="data-table">
+
+                    <h:column>
+                        <f:facet name="header">ID</f:facet>
+
+                        <h:outputText
+                                value="#{usuario.id}"/>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">Código</f:facet>
+
+                        <h:outputText
+                                value="#{usuario.codigo}"
+                                styleClass="user-code"/>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">Nombres</f:facet>
+
+                        <h:outputText
+                                value="#{usuario.nombres}"
+                                styleClass="user-name"/>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">Apellidos</f:facet>
+
+                        <h:outputText
+                                value="#{usuario.apellidos}"
+                                styleClass="user-name"/>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">Correo</f:facet>
+
+                        <h:outputText
+                                value="#{usuario.correo}"
+                                styleClass="user-email"/>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">Estado</f:facet>
+
+                        <h:outputText
+                                value="#{usuario.activo ? 'Activo' : 'Inactivo'}"
+                                styleClass="#{usuario.activo ? 'status status-active' : 'status status-inactive'}"/>
+                    </h:column>
+
+                </h:dataTable>
+
+            </div>
+
+            <div class="table-note">
+                En celulares puedes desplazar horizontalmente
+                la tabla para consultar las seis columnas.
+            </div>
+
+        </section>
+
+        <!-- ACCESOS RÁPIDOS -->
+        <nav class="quick-links"
+             aria-label="Accesos relacionados">
+
+            <h:link
+                    outcome="/libros.xhtml"
+                    value="Gestionar libros"/>
+
+            <h:link
+                    outcome="/ejemplares.xhtml"
+                    value="Gestionar ejemplares"/>
+
+            <h:link
+                    outcome="/prestamos.xhtml"
+                    value="Consultar préstamos"/>
+
+            <h:link
+                    outcome="/index.xhtml"
+                    value="Volver al inicio"/>
+
+        </nav>
+
+    </main>
+
+    <!-- PIE DE PÁGINA -->
+    <footer class="footer">
+
+        <strong>
+            Biblioteca de la Universidad Tecnológica XYZ
+        </strong>
+
+        | Sistema de Gestión Bibliotecaria
+
+    </footer>
+
+</h:body>
+</html>

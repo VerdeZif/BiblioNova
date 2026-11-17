@@ -1,0 +1,48 @@
+dn: ou=people,dc=universidad,dc=test
+objectClass: top
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=groups,dc=universidad,dc=test
+objectClass: top
+objectClass: organizationalUnit
+ou: groups
+
+dn: uid=adminbiblioteca,ou=people,dc=universidad,dc=test
+objectClass: top
+objectClass: inetOrgPerson
+cn: Administrador de Biblioteca
+sn: Biblioteca
+uid: adminbiblioteca
+
+dn: uid=bib001,ou=people,dc=universidad,dc=test
+objectClass: top
+objectClass: inetOrgPerson
+cn: Bibliotecario Prueba
+sn: Prueba
+uid: bib001
+
+dn: uid=est001,ou=people,dc=universidad,dc=test
+objectClass: top
+objectClass: inetOrgPerson
+cn: Estudiante Prueba
+sn: Prueba
+uid: est001
+
+dn: cn=administradores,ou=groups,dc=universidad,dc=test
+objectClass: top
+objectClass: groupOfNames
+cn: administradores
+member: uid=adminbiblioteca,ou=people,dc=universidad,dc=test
+
+dn: cn=bibliotecarios,ou=groups,dc=universidad,dc=test
+objectClass: top
+objectClass: groupOfNames
+cn: bibliotecarios
+member: uid=bib001,ou=people,dc=universidad,dc=test
+
+dn: cn=estudiantes,ou=groups,dc=universidad,dc=test
+objectClass: top
+objectClass: groupOfNames
+cn: estudiantes
+member: uid=est001,ou=people,dc=universidad,dc=test

@@ -1,0 +1,28 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html">
+<h:head>
+    <title>BiblioNova - Conexion MySQL</title>
+</h:head>
+
+<h:body style="font-family: Arial; background: #F8F6F1; padding: 40px;">
+
+    <h1 style="color: #3D7669;">
+        BiblioNova Universitaria
+    </h1>
+
+    <h2>Prueba de conexion JPA / Hibernate</h2>
+
+    <h:form>
+        <h:commandButton
+                value="Probar conexion MySQL"
+                action="#{conexionBean.probarConexion}" />
+
+        <h:panelGroup layout="block" style="margin-top: 20px;">
+            <h:outputText value="#{conexionBean.mensaje}" />
+        </h:panelGroup>
+    </h:form>
+
+</h:body>
+</html>

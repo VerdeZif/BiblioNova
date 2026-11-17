@@ -1,0 +1,47 @@
+# Archivos compilados
+target/
+*.class
+*.war
+*.jar
+
+# Configuración del IDE
+.idea/
+*.iml
+.vscode/
+
+# Archivos temporales
+*.log
+*.tmp
+*.bak
+
+# Certificados y almacenes locales
+ldap-certs/
+*.key
+*.p12
+*.pfx
+*.jks
+
+# Configuración privada
+.env
+.env.*
+!.env.example
+ldap.properties
+secrets.properties
+
+# Archivos generados accidentalmente
+/-H
+/-file
+
+# Archivos del sistema operativo
+Thumbs.db
+.DS_Store
+
+# Certificados generados para Docker
+docker/certs/
+
+docker/compose.prueba.yml
+README.md.bak
+publicar-jsf.ps1
+docker/.env
+
+publicar-jsf.ps1

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.biblionova</groupId>
+    <artifactId>biblionova-jsf</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+    <properties>
+        <maven.compiler.release>17</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+            <version>10.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Generación de reportes PDF -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.8</version>
+        </dependency>
+        <!-- Generación de reportes Excel -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-ooxml</artifactId>
+            <version>5.5.1</version>
+        </dependency>
+        <!-- Hibernate ORM proporcionado por WildFly 42 -->
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>7.4.13.Final</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <finalName>biblionova-jsf</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration><failOnMissingWebXml>false</failOnMissingWebXml></configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

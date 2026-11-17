@@ -1,0 +1,976 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1"/>
+
+    <title>
+        Gestión de devoluciones | Universidad Tecnológica XYZ
+    </title>
+
+    <style>
+        :root {
+            --granate: #69091F;
+            --granate-oscuro: #490917;
+            --granate-claro: #851733;
+            --dorado: #C99B29;
+            --dorado-claro: #F4E8C5;
+            --fondo: #F8F5F1;
+            --blanco: #FFFFFF;
+            --texto: #262329;
+            --secundario: #69636A;
+            --borde: #E9E3DF;
+            --error: #B42335;
+            --exito: #23764B;
+            --sombra: 0 8px 30px rgba(55,25,30,.06);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: var(--fondo);
+            color: var(--texto);
+            line-height: 1.5;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        input, select, button {
+            font: inherit;
+        }
+
+        .top-accent {
+            height: 5px;
+            background: var(--dorado);
+        }
+
+        /* ENCABEZADO INSTITUCIONAL */
+
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .header-inner {
+            max-width: 1240px;
+            margin: auto;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            min-width: 0;
+        }
+
+        .brand-logo {
+            width: 90px;
+            height: 90px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .brand-title {
+            color: var(--granate);
+            font-size: 17px;
+            font-weight: 750;
+            line-height: 1.3;
+        }
+
+        .brand-subtitle {
+            display: block;
+            color: var(--secundario);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            text-align: right;
+            font-size: 13px;
+            color: var(--secundario);
+        }
+
+        .user-info strong {
+            display: block;
+            color: var(--granate);
+            font-size: 15px;
+        }
+
+        .logout {
+            background: white;
+            border: 1px solid var(--granate);
+            color: var(--granate);
+            border-radius: 8px;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: .2s;
+        }
+
+        .logout:hover {
+            background: var(--granate);
+            color: white;
+        }
+
+        /* NAVEGACIÓN */
+
+        .navigation {
+            background: var(--granate);
+        }
+
+        .nav-inner {
+            max-width: 1240px;
+            margin: auto;
+            padding: 0 18px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+        }
+
+        .nav-inner a {
+            display: inline-block;
+            padding: 15px 14px;
+            color: white;
+            font-size: 13px;
+            font-weight: 650;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+
+        .nav-inner a:hover {
+            background: var(--granate-claro);
+        }
+
+        .nav-inner .active {
+            background: rgba(255,255,255,.08);
+            border-bottom-color: var(--dorado);
+        }
+
+        /* CONTENIDO PRINCIPAL */
+
+        .container {
+            max-width: 1240px;
+            width: calc(100% - 48px);
+            margin: 35px auto 60px;
+        }
+
+        .breadcrumb {
+            margin-bottom: 18px;
+            font-size: 13px;
+            color: var(--secundario);
+        }
+
+        .breadcrumb a {
+            color: var(--granate);
+            font-weight: 650;
+        }
+
+        .page-heading {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .page-icon {
+            width: 55px;
+            height: 55px;
+            flex-shrink: 0;
+            background: var(--dorado-claro);
+            color: var(--granate);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-icon svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .page-heading h1 {
+            margin: 0 0 4px;
+            font-size: 28px;
+            color: var(--granate);
+            line-height: 1.25;
+        }
+
+        .page-heading p {
+            margin: 0;
+            color: var(--secundario);
+            font-size: 14px;
+        }
+
+        /* TARJETAS */
+
+        .card {
+            background: white;
+            border: 1px solid var(--borde);
+            border-radius: 14px;
+            box-shadow: var(--sombra);
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .card-header {
+            padding: 22px 28px;
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .card-header h2 {
+            margin: 0;
+            color: var(--granate);
+            font-size: 19px;
+        }
+
+        .card-header p {
+            color: var(--secundario);
+            font-size: 13px;
+            margin: 5px 0 0;
+        }
+
+        .card-body {
+            padding: 28px;
+        }
+
+        /* AVISO */
+
+        .notice {
+            display: flex;
+            align-items: flex-start;
+            gap: 13px;
+            background: #FBF6E8;
+            border: 1px solid #EBDDAD;
+            border-left: 4px solid var(--dorado);
+            border-radius: 9px;
+            padding: 17px 19px;
+            margin-bottom: 26px;
+        }
+
+        .notice-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 27px;
+            height: 27px;
+            border-radius: 50%;
+            background: var(--dorado-claro);
+            color: var(--granate);
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .notice strong {
+            display: block;
+            color: var(--granate);
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+
+        .notice p {
+            margin: 0;
+            color: #65563B;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* FORMULARIO */
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+            margin-bottom: 24px;
+        }
+
+        .field label {
+            color: var(--texto);
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .input {
+            width: 100%;
+            min-height: 46px;
+            padding: 12px 14px;
+            border: 1px solid #D9D0D1;
+            border-radius: 9px;
+            font-size: 14px;
+            color: var(--texto);
+            background: white;
+            cursor: pointer;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--granate);
+            box-shadow: 0 0 0 3px rgba(105,9,31,.10);
+        }
+
+        .help {
+            font-size: 12px;
+            color: var(--secundario);
+            line-height: 1.6;
+        }
+
+        .field-error {
+            font-size: 12px;
+            color: var(--error);
+            line-height: 1.5;
+        }
+
+        .form-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding-top: 22px;
+            border-top: 1px solid var(--borde);
+        }
+
+        .btn-primary {
+            background: var(--granate);
+            color: white;
+            border: 1px solid var(--granate);
+            border-radius: 9px;
+            padding: 13px 24px;
+            font-weight: 750;
+            font-size: 14px;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .btn-primary:hover {
+            background: var(--granate-claro);
+        }
+
+        .btn-primary:focus-visible,
+        .logout:focus-visible {
+            outline: 3px solid var(--dorado);
+            outline-offset: 3px;
+        }
+
+        /* MENSAJES DEL BACKEND */
+
+        .message {
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.6;
+        }
+
+        .success {
+            color: var(--exito);
+        }
+
+        .error {
+            color: var(--error);
+        }
+
+        /* TABLA */
+
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            scrollbar-width: thin;
+        }
+
+        .data-table {
+            width: 100%;
+            min-width: 1180px;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .data-table th {
+            background: #F5EEE8;
+            color: var(--granate);
+            border-bottom: 2px solid var(--dorado);
+            padding: 15px 17px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 750;
+            white-space: nowrap;
+        }
+
+        .data-table td {
+            padding: 15px 17px;
+            border-bottom: 1px solid var(--borde);
+            text-align: left;
+            vertical-align: middle;
+            overflow-wrap: anywhere;
+        }
+
+        .data-table tbody tr:nth-child(even) {
+            background: #FDFBF9;
+        }
+
+        .data-table tbody tr:hover {
+            background: #FAF3EF;
+        }
+
+        .student-name {
+            font-weight: 650;
+        }
+
+        .book-title {
+            font-weight: 600;
+        }
+
+        .item-code {
+            color: var(--granate);
+            font-weight: 750;
+        }
+
+        .table-note {
+            padding: 16px 25px;
+            border-top: 1px solid var(--borde);
+            color: var(--secundario);
+            font-size: 12px;
+        }
+
+        /* ENLACES RÁPIDOS */
+
+        .quick-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .quick-links a {
+            display: inline-block;
+            background: white;
+            border: 1px solid #D9C6C9;
+            border-radius: 9px;
+            padding: 11px 17px;
+            color: var(--granate);
+            font-size: 13px;
+            font-weight: 700;
+            transition: .2s;
+        }
+
+        .quick-links a:hover {
+            background: #FBF5F6;
+            border-color: var(--granate);
+        }
+
+        /* PIE DE PÁGINA */
+
+        .footer {
+            background: white;
+            border-top: 1px solid var(--borde);
+            padding: 23px 16px;
+            color: var(--secundario);
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .footer strong {
+            color: var(--granate);
+        }
+
+        /* TABLETS */
+
+        @media (max-width: 850px) {
+            .header-inner {
+                padding: 12px 18px;
+            }
+
+            .brand-logo {
+                width: 75px;
+                height: 75px;
+            }
+        }
+
+        /* CELULARES */
+
+        @media (max-width: 650px) {
+            .header-inner {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .brand-logo {
+                width: 65px;
+                height: 65px;
+            }
+
+            .brand-title {
+                font-size: 14px;
+            }
+
+            .header-actions {
+                justify-content: space-between;
+                padding-top: 12px;
+                border-top: 1px solid var(--borde);
+            }
+
+            .user-info {
+                text-align: left;
+            }
+
+            .nav-inner {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding: 0 9px;
+                scrollbar-width: thin;
+            }
+
+            .nav-inner a {
+                font-size: 12px;
+                padding: 13px 12px;
+            }
+
+            .container {
+                width: calc(100% - 28px);
+                margin-top: 22px;
+            }
+
+            .page-heading h1 {
+                font-size: 23px;
+            }
+
+            .page-icon {
+                width: 46px;
+                height: 46px;
+            }
+
+            .card-header {
+                padding: 19px;
+            }
+
+            .card-body {
+                padding: 19px;
+            }
+
+            .notice {
+                padding: 15px;
+            }
+
+            .input {
+                font-size: 16px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-primary {
+                width: 100%;
+            }
+
+            .quick-links {
+                flex-direction: column;
+            }
+
+            .quick-links a {
+                text-align: center;
+            }
+        }
+    </style>
+</h:head>
+
+<h:body>
+
+    <div class="top-accent"></div>
+
+    <!-- ENCABEZADO INSTITUCIONAL -->
+    <header class="header">
+
+        <div class="header-inner">
+
+            <div class="brand">
+
+                <img
+                        src="#{facesContext.externalContext.requestContextPath}/resources/img/logo-universidad-xyz.png"
+                        class="brand-logo"
+                        alt="Logo de la Universidad Tecnológica XYZ"/>
+
+                <div>
+                    <div class="brand-title">
+                        Universidad Tecnológica XYZ
+                    </div>
+
+                    <span class="brand-subtitle">
+                        Sistema de Gestión Bibliotecaria
+                    </span>
+                </div>
+
+            </div>
+
+            <div class="header-actions">
+
+                <div class="user-info">
+                    Sesión iniciada como
+                    <strong>
+                        <h:outputText
+                                value="#{loginBean.usuarioAutenticado}"/>
+                    </strong>
+                </div>
+
+                <h:form>
+                    <h:commandButton
+                            value="Cerrar sesión"
+                            action="#{loginBean.cerrarSesion}"
+                            styleClass="logout"/>
+                </h:form>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    <!-- NAVEGACIÓN PRINCIPAL -->
+    <nav class="navigation"
+         aria-label="Navegación principal">
+
+        <div class="nav-inner">
+
+            <h:link outcome="/index.xhtml"
+                    value="Inicio"/>
+
+            <h:link outcome="/libros.xhtml"
+                    value="Libros"/>
+
+            <h:link outcome="/ejemplares.xhtml"
+                    value="Ejemplares"/>
+
+            <h:link outcome="/prestamos.xhtml"
+                    value="Préstamos"/>
+
+            <h:link outcome="/devoluciones.xhtml"
+                    value="Devoluciones"
+                    styleClass="active"/>
+
+            <h:link outcome="/reportes.xhtml"
+                    value="Reportes"/>
+
+            <h:panelGroup
+                    rendered="#{loginBean.tieneRol('ADMINISTRADOR')}">
+
+                <h:link outcome="/usuarios.xhtml"
+                        value="Usuarios"/>
+
+            </h:panelGroup>
+
+            <h:link outcome="/mis-roles.xhtml"
+                    value="Mi perfil"/>
+
+        </div>
+
+    </nav>
+
+    <!-- CONTENIDO -->
+    <main class="container">
+
+        <div class="breadcrumb">
+            <h:link outcome="/index.xhtml"
+                    value="Inicio"/>
+            / Gestión de devoluciones
+        </div>
+
+        <div class="page-heading">
+
+            <div class="page-icon">
+
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="1.8"
+                     stroke-linecap="round"
+                     stroke-linejoin="round"
+                     aria-hidden="true">
+
+                    <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21z"/>
+                    <path d="M4 5.5V21"/>
+                    <path d="M8 7h8M8 11h6"/>
+                    <path d="M9 16l-3 3 3 3"/>
+                    <path d="M6 19h11"/>
+
+                </svg>
+
+            </div>
+
+            <div>
+                <h1>Gestión de devoluciones</h1>
+
+                <p>
+                    Registro de devoluciones y seguimiento
+                    del historial de préstamos bibliográficos.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- REGISTRO DE DEVOLUCIONES -->
+        <section class="card">
+
+            <div class="card-header">
+
+                <h2>Registrar devolución de libro</h2>
+
+                <p>
+                    Selecciona un préstamo activo
+                    para registrar la devolución.
+                </p>
+
+            </div>
+
+            <div class="card-body">
+
+                <div class="notice">
+
+                    <div class="notice-icon">i</div>
+
+                    <div>
+                        <strong>
+                            Información sobre devoluciones
+                        </strong>
+
+                        <p>
+                            Al registrar una devolución correctamente,
+                            el préstamo se actualiza y el ejemplar
+                            vuelve a quedar disponible para
+                            un nuevo préstamo.
+                        </p>
+                    </div>
+
+                </div>
+
+                <h:form id="formDevolucion">
+
+                    <div class="field">
+
+                        <h:outputLabel
+                                for="prestamo"
+                                value="Préstamo activo *"/>
+
+                        <h:selectOneMenu
+                                id="prestamo"
+                                value="#{devolucionBean.prestamoId}"
+                                required="true"
+                                requiredMessage="Debes seleccionar un préstamo."
+                                styleClass="input">
+
+                            <f:selectItem
+                                    itemLabel="-- Seleccionar préstamo --"
+                                    itemValue="#{null}"
+                                    noSelectionOption="true"/>
+
+                            <f:selectItems
+                                    value="#{devolucionBean.prestamosActivos}"
+                                    var="prestamo"
+                                    itemValue="#{prestamo.id}"
+                                    itemLabel="#{prestamo.id} - #{prestamo.usuario.nombres} #{prestamo.usuario.apellidos} - #{prestamo.ejemplar.codigo}"/>
+
+                        </h:selectOneMenu>
+
+                        <span class="help">
+                            Se muestran únicamente los préstamos
+                            que siguen activos.
+                        </span>
+
+                        <h:message
+                                for="prestamo"
+                                styleClass="field-error"/>
+
+                    </div>
+
+                    <div class="form-actions">
+
+                        <h:commandButton
+                                value="Registrar devolución"
+                                action="#{devolucionBean.devolver}"
+                                styleClass="btn-primary"/>
+
+                        <h:panelGroup
+                                layout="block"
+                                rendered="#{not empty devolucionBean.mensaje}"
+                                styleClass="message">
+
+                            <h:outputText
+                                    value="#{devolucionBean.mensaje}"
+                                    styleClass="#{devolucionBean.exitoso ? 'success' : 'error'}"/>
+
+                        </h:panelGroup>
+
+                    </div>
+
+                </h:form>
+
+            </div>
+
+        </section>
+
+        <!-- HISTORIAL -->
+        <section class="card">
+
+            <div class="card-header">
+
+                <h2>Historial de préstamos y devoluciones</h2>
+
+                <p>
+                    Consulta las fechas, el estado de cada
+                    préstamo y las devoluciones registradas.
+                </p>
+
+            </div>
+
+            <div class="table-container">
+
+                <h:dataTable
+                        value="#{devolucionBean.prestamos}"
+                        var="prestamo"
+                        styleClass="data-table">
+
+                    <h:column>
+                        <f:facet name="header">ID</f:facet>
+
+                        <h:outputText
+                                value="#{prestamo.id}"/>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">Estudiante</f:facet>
+
+                        <span class="student-name">
+                            <h:outputText
+                                    value="#{prestamo.usuario.nombres}"/>
+
+                            <h:outputText
+                                    value=" #{prestamo.usuario.apellidos}"/>
+                        </span>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">Libro</f:facet>
+
+                        <h:outputText
+                                value="#{prestamo.ejemplar.libro.titulo}"
+                                styleClass="book-title"/>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">Ejemplar</f:facet>
+
+                        <h:outputText
+                                value="#{prestamo.ejemplar.codigo}"
+                                styleClass="item-code"/>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">
+                            Fecha préstamo
+                        </f:facet>
+
+                        <h:outputText
+                                value="#{prestamo.fechaPrestamo}"/>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">
+                            Vencimiento
+                        </f:facet>
+
+                        <h:outputText
+                                value="#{prestamo.fechaVencimiento}"/>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">
+                            Devolución
+                        </f:facet>
+
+                        <h:outputText
+                                value="#{prestamo.fechaDevolucion != null ? prestamo.fechaDevolucion : 'Pendiente'}"/>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">Estado</f:facet>
+
+                        <h:outputText
+                                value="#{prestamo.estado}"/>
+                    </h:column>
+
+                </h:dataTable>
+
+            </div>
+
+            <div class="table-note">
+                En dispositivos móviles, desplaza la tabla
+                horizontalmente para consultar sus ocho columnas.
+            </div>
+
+        </section>
+
+        <!-- ACCESOS RELACIONADOS -->
+        <nav class="quick-links"
+             aria-label="Accesos relacionados">
+
+            <h:link
+                    outcome="/libros.xhtml"
+                    value="Consultar libros"/>
+
+            <h:link
+                    outcome="/ejemplares.xhtml"
+                    value="Consultar ejemplares"/>
+
+            <h:link
+                    outcome="/prestamos.xhtml"
+                    value="Gestionar préstamos"/>
+
+            <h:panelGroup
+                    rendered="#{loginBean.tieneRol('ADMINISTRADOR')}">
+
+                <h:link
+                        outcome="/usuarios.xhtml"
+                        value="Administrar usuarios"/>
+
+            </h:panelGroup>
+
+        </nav>
+
+    </main>
+
+    <!-- PIE DE PÁGINA -->
+    <footer class="footer">
+
+        <strong>
+            Biblioteca de la Universidad Tecnológica XYZ
+        </strong>
+
+        | Sistema de Gestión Bibliotecaria
+
+    </footer>
+
+</h:body>
+</html>

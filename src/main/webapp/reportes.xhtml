@@ -1,0 +1,775 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html"
+      xmlns:f="jakarta.faces.core">
+
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1"/>
+
+    <title>Reportes | Universidad Tecnológica XYZ</title>
+
+    <style>
+        :root {
+            --granate: #69091F;
+            --granate-hover: #851733;
+            --dorado: #C99B29;
+            --dorado-suave: #F4E8C5;
+            --fondo: #F8F5F1;
+            --texto: #262329;
+            --muted: #69636A;
+            --borde: #E9E3DF;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: var(--fondo);
+            color: var(--texto);
+            line-height: 1.5;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .top-line {
+            height: 5px;
+            background: var(--dorado);
+        }
+
+        /* ENCABEZADO */
+
+        .header {
+            background: white;
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .header-content {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 0;
+        }
+
+        .brand img {
+            width: 85px;
+            height: 85px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .brand-name {
+            color: var(--granate);
+            font-size: 17px;
+            font-weight: 750;
+        }
+
+        .brand-description {
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 4px;
+        }
+
+        .account {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .account-info {
+            text-align: right;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .account-info strong {
+            display: block;
+            color: var(--granate);
+            font-size: 14px;
+        }
+
+        .logout {
+            padding: 10px 15px;
+            background: white;
+            color: var(--granate);
+            border: 1px solid var(--granate);
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .logout:hover {
+            background: var(--granate);
+            color: white;
+        }
+
+        /* MENÚ */
+
+        .main-nav {
+            background: var(--granate);
+        }
+
+        .nav-content {
+            max-width: 1240px;
+            margin: auto;
+            padding: 0 18px;
+            display: flex;
+            gap: 2px;
+            flex-wrap: wrap;
+        }
+
+        .nav-content a {
+            color: white;
+            display: inline-block;
+            padding: 15px 14px;
+            font-size: 13px;
+            font-weight: 650;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+        }
+
+        .nav-content a:hover {
+            background: var(--granate-hover);
+        }
+
+        .nav-content a.active {
+            border-bottom-color: var(--dorado);
+            background: rgba(255,255,255,.08);
+        }
+
+        /* CONTENIDO GENERAL */
+
+        .container {
+            max-width: 1240px;
+            width: calc(100% - 48px);
+            margin: 32px auto 60px;
+        }
+
+        .breadcrumb {
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 18px;
+        }
+
+        .breadcrumb a {
+            color: var(--granate);
+            font-weight: 700;
+        }
+
+        .page-heading {
+            margin-bottom: 26px;
+        }
+
+        .page-heading h1 {
+            margin: 0 0 7px;
+            color: var(--granate);
+            font-size: 29px;
+        }
+
+        .page-heading p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 750;
+            color: var(--granate);
+            border-left: 4px solid var(--dorado);
+            padding-left: 12px;
+            margin: 0 0 18px;
+        }
+
+        /* EXPORTACIONES */
+
+        .export-panel {
+            background: white;
+            border: 1px solid var(--borde);
+            border-radius: 14px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 18px rgba(40,20,25,.04);
+        }
+
+        .export-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .export-info h2 {
+            color: var(--granate);
+            font-size: 18px;
+            margin: 0 0 5px;
+        }
+
+        .export-info p {
+            color: var(--muted);
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .export-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 21px;
+            min-height: 44px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-pdf {
+            background: var(--granate);
+            color: white;
+            border: 1px solid var(--granate);
+        }
+
+        .btn-pdf:hover {
+            background: var(--granate-hover);
+        }
+
+        .btn-excel {
+            background: white;
+            color: var(--granate);
+            border: 1px solid var(--granate);
+        }
+
+        .btn-excel:hover {
+            background: #FBF5F6;
+        }
+
+        /* CUADRÍCULA DE ESTADÍSTICAS */
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 20px;
+            width: 100%;
+            margin: 0 0 32px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid var(--borde);
+            border-top: 4px solid var(--dorado);
+            border-radius: 12px;
+            padding: 24px;
+            min-width: 0;
+            min-height: 165px;
+            box-shadow: 0 5px 18px rgba(40,20,25,.04);
+        }
+
+        .stat-label {
+            display: block;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 650;
+            margin-bottom: 14px;
+        }
+
+        .stat-value {
+            display: block;
+            color: var(--granate);
+            font-size: 38px;
+            font-weight: 800;
+            line-height: 1.2;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .stat-detail {
+            display: block;
+            color: var(--muted);
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        /* TABLA */
+
+        .report-card {
+            background: white;
+            border: 1px solid var(--borde);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 28px;
+            box-shadow: 0 5px 18px rgba(40,20,25,.04);
+        }
+
+        .report-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .report-header h2 {
+            color: var(--granate);
+            font-size: 19px;
+            margin: 0 0 5px;
+        }
+
+        .report-header p {
+            color: var(--muted);
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .report-table {
+            width: 100%;
+            min-width: 480px;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .report-table th {
+            padding: 15px 20px;
+            text-align: left;
+            color: var(--granate);
+            background: #F5EEE8;
+            border-bottom: 2px solid var(--dorado);
+        }
+
+        .report-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .report-table tbody tr:nth-child(even) {
+            background: #FDFBF9;
+        }
+
+        .report-table tbody tr:hover {
+            background: #FAF3EF;
+        }
+
+        .book-name {
+            font-weight: 650;
+        }
+
+        .count-pill {
+            display: inline-block;
+            background: var(--dorado-suave);
+            color: var(--granate);
+            padding: 6px 13px;
+            border-radius: 8px;
+            font-weight: 800;
+        }
+
+        .report-note {
+            color: var(--muted);
+            padding: 16px 24px;
+            font-size: 12px;
+        }
+
+        /* ACCESOS RÁPIDOS */
+
+        .quick-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .quick-links a {
+            background: white;
+            color: var(--granate);
+            border: 1px solid #D9C6C9;
+            border-radius: 8px;
+            padding: 11px 16px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .quick-links a:hover {
+            border-color: var(--granate);
+            background: #FBF5F6;
+        }
+
+        /* PIE */
+
+        .footer {
+            padding: 23px 15px;
+            background: white;
+            border-top: 1px solid var(--borde);
+            text-align: center;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .footer strong {
+            color: var(--granate);
+        }
+
+        /* RESPONSIVE */
+
+        @media (max-width: 1000px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .export-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 650px) {
+            .header-content {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+                padding: 12px 16px;
+            }
+
+            .brand img {
+                width: 65px;
+                height: 65px;
+            }
+
+            .brand-name {
+                font-size: 14px;
+            }
+
+            .account {
+                border-top: 1px solid var(--borde);
+                padding-top: 12px;
+                justify-content: space-between;
+            }
+
+            .account-info {
+                text-align: left;
+            }
+
+            .nav-content {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding: 0 9px;
+            }
+
+            .nav-content a {
+                padding: 13px 12px;
+                font-size: 12px;
+            }
+
+            .container {
+                width: calc(100% - 28px);
+                margin-top: 22px;
+            }
+
+            .page-heading h1 {
+                font-size: 24px;
+            }
+
+            .export-panel {
+                padding: 20px;
+            }
+
+            .export-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .stat-card {
+                padding: 20px;
+                min-height: 140px;
+            }
+
+            .stat-value {
+                font-size: 34px;
+            }
+
+            .quick-links {
+                flex-direction: column;
+            }
+
+            .quick-links a {
+                text-align: center;
+            }
+        }
+    </style>
+</h:head>
+
+<h:body>
+
+    <div class="top-line"></div>
+
+    <!-- ENCABEZADO -->
+    <header class="header">
+        <div class="header-content">
+
+            <div class="brand">
+                <img
+                        src="#{facesContext.externalContext.requestContextPath}/resources/img/logo-universidad-xyz.png"
+                        alt="Universidad Tecnológica XYZ"/>
+
+                <div>
+                    <div class="brand-name">
+                        Universidad Tecnológica XYZ
+                    </div>
+                    <div class="brand-description">
+                        Sistema de Gestión Bibliotecaria
+                    </div>
+                </div>
+            </div>
+
+            <div class="account">
+                <div class="account-info">
+                    Sesión iniciada como
+                    <strong>
+                        <h:outputText value="#{loginBean.usuarioAutenticado}"/>
+                    </strong>
+                </div>
+
+                <h:form id="formSesion">
+                    <h:commandButton
+                            value="Cerrar sesión"
+                            action="#{loginBean.cerrarSesion}"
+                            styleClass="logout"/>
+                </h:form>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- NAVEGACIÓN -->
+    <nav class="main-nav">
+        <div class="nav-content">
+
+            <h:link outcome="/index.xhtml" value="Inicio"/>
+
+            <h:link outcome="/libros.xhtml" value="Libros"/>
+
+            <h:link outcome="/ejemplares.xhtml" value="Ejemplares"/>
+
+            <h:link outcome="/prestamos.xhtml" value="Préstamos"/>
+
+            <h:link outcome="/devoluciones.xhtml" value="Devoluciones"/>
+
+            <h:link outcome="/reportes.xhtml"
+                    value="Reportes"
+                    styleClass="active"/>
+
+            <h:panelGroup rendered="#{loginBean.tieneRol('ADMINISTRADOR')}">
+                <h:link outcome="/usuarios.xhtml" value="Usuarios"/>
+            </h:panelGroup>
+
+            <h:link outcome="/mis-roles.xhtml" value="Mi perfil"/>
+
+        </div>
+    </nav>
+
+    <!-- CONTENIDO -->
+    <main class="container">
+
+        <div class="breadcrumb">
+            <h:link outcome="/index.xhtml" value="Inicio"/>
+            / Reportes
+        </div>
+
+        <div class="page-heading">
+            <h1>Panel de reportes</h1>
+            <p>
+                Estadísticas bibliotecarias obtenidas
+                mediante consultas JPQL.
+            </p>
+        </div>
+
+        <!-- EXPORTACIONES -->
+        <section class="export-panel">
+            <div class="export-content">
+
+                <div class="export-info">
+                    <h2>Exportación de reportes</h2>
+                    <p>
+                        Descarga la información en PDF o Excel.
+                    </p>
+                </div>
+
+                <h:form id="formExportacion">
+                    <div class="export-buttons">
+
+                        <h:commandButton
+                                value="Descargar PDF"
+                                action="#{reporteBean.descargarPdf}"
+                                styleClass="btn btn-pdf"/>
+
+                        <h:commandButton
+                                value="Descargar Excel"
+                                action="#{reporteBean.descargarExcel}"
+                                styleClass="btn btn-excel"/>
+
+                    </div>
+                </h:form>
+
+            </div>
+        </section>
+
+        <!-- ESTADÍSTICAS -->
+        <h2 class="section-title">Resumen general</h2>
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <span class="stat-label">Libros registrados</span>
+                <div class="stat-value">
+                    <h:outputText value="#{reporteBean.totalLibros}"/>
+                </div>
+                <span class="stat-detail">Títulos del catálogo</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Ejemplares físicos</span>
+                <div class="stat-value">
+                    <h:outputText value="#{reporteBean.totalEjemplares}"/>
+                </div>
+                <span class="stat-detail">Unidades físicas registradas</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Ejemplares disponibles</span>
+                <div class="stat-value">
+                    <h:outputText value="#{reporteBean.ejemplaresDisponibles}"/>
+                </div>
+                <span class="stat-detail">Disponibles para préstamo</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Usuarios activos</span>
+                <div class="stat-value">
+                    <h:outputText value="#{reporteBean.usuariosActivos}"/>
+                </div>
+                <span class="stat-detail">Usuarios habilitados</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Préstamos activos</span>
+                <div class="stat-value">
+                    <h:outputText value="#{reporteBean.prestamosActivos}"/>
+                </div>
+                <span class="stat-detail">Pendientes de devolución</span>
+            </div>
+
+            <div class="stat-card">
+                <span class="stat-label">Préstamos devueltos</span>
+                <div class="stat-value">
+                    <h:outputText value="#{reporteBean.prestamosDevueltos}"/>
+                </div>
+                <span class="stat-detail">Devoluciones registradas</span>
+            </div>
+
+        </div>
+
+        <!-- LIBROS MÁS PRESTADOS -->
+        <section class="report-card">
+
+            <div class="report-header">
+                <h2>Libros más prestados</h2>
+                <p>
+                    Historial de préstamos por título bibliográfico.
+                </p>
+            </div>
+
+            <div class="table-wrapper">
+                <h:dataTable
+                        value="#{reporteBean.prestamosPorLibro}"
+                        var="fila"
+                        styleClass="report-table">
+
+                    <h:column>
+                        <f:facet name="header">
+                            Título del libro
+                        </f:facet>
+
+                        <h:outputText
+                                value="#{fila.titulo}"
+                                styleClass="book-name"/>
+                    </h:column>
+
+                    <h:column>
+                        <f:facet name="header">
+                            Cantidad de préstamos
+                        </f:facet>
+
+                        <h:outputText
+                                value="#{fila.cantidad}"
+                                styleClass="count-pill"/>
+                    </h:column>
+
+                </h:dataTable>
+            </div>
+
+            <div class="report-note">
+                Las cantidades corresponden al historial
+                registrado en el sistema.
+            </div>
+
+        </section>
+
+        <!-- ACCESOS -->
+        <nav class="quick-links">
+
+            <h:link outcome="/libros.xhtml"
+                    value="Consultar libros"/>
+
+            <h:link outcome="/ejemplares.xhtml"
+                    value="Consultar ejemplares"/>
+
+            <h:link outcome="/prestamos.xhtml"
+                    value="Gestionar préstamos"/>
+
+            <h:link outcome="/devoluciones.xhtml"
+                    value="Gestionar devoluciones"/>
+
+            <h:panelGroup rendered="#{loginBean.tieneRol('ADMINISTRADOR')}">
+                <h:link outcome="/usuarios.xhtml"
+                        value="Administrar usuarios"/>
+            </h:panelGroup>
+
+        </nav>
+
+    </main>
+
+    <footer class="footer">
+        <strong>Biblioteca de la Universidad Tecnológica XYZ</strong>
+        | Sistema de Gestión Bibliotecaria
+    </footer>
+
+</h:body>
+</html>

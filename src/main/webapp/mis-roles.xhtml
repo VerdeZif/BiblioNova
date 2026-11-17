@@ -1,0 +1,753 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html">
+
+<h:head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1"/>
+
+    <title>Mi perfil | Universidad Tecnológica XYZ</title>
+
+    <style>
+        :root {
+            --vino: #69091F;
+            --vino-oscuro: #490917;
+            --oro: #C99B29;
+            --marfil: #F8F5F1;
+            --texto: #262329;
+            --gris: #69636A;
+            --borde: #E9E3DF;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+        }
+
+        body {
+            background: var(--marfil);
+            color: var(--texto);
+            font-family: "Segoe UI", Arial, sans-serif;
+            line-height: 1.5;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        /* ENCABEZADO */
+
+        .xyz-top {
+            height: 5px;
+            background: var(--oro);
+        }
+
+        .xyz-header {
+            background: #FFFFFF;
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .xyz-header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .xyz-brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            min-width: 0;
+        }
+
+        .xyz-logo {
+            width: 82px;
+            height: 82px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .xyz-brand-name {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--vino);
+        }
+
+        .xyz-brand-description {
+            font-size: 12px;
+            color: var(--gris);
+            margin-top: 4px;
+        }
+
+        .xyz-account {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .xyz-account-label {
+            color: var(--gris);
+            text-align: right;
+            font-size: 12px;
+        }
+
+        .xyz-account-name {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--vino);
+        }
+
+        .xyz-logout {
+            background: #FFFFFF;
+            color: var(--vino);
+            border: 1px solid var(--vino);
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .xyz-logout:hover {
+            background: var(--vino);
+            color: #FFFFFF;
+        }
+
+        /* MENÚ */
+
+        .xyz-menu {
+            background: var(--vino);
+        }
+
+        .xyz-menu-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .xyz-menu-inner a {
+            display: inline-block;
+            padding: 15px 13px;
+            color: #FFFFFF;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            border-bottom: 3px solid transparent;
+        }
+
+        .xyz-menu-inner a:hover {
+            background: #851733;
+        }
+
+        .xyz-menu-inner a.xyz-selected {
+            background: rgba(255,255,255,.1);
+            border-bottom-color: var(--oro);
+        }
+
+        /* CONTENIDO */
+
+        .xyz-main {
+            width: calc(100% - 40px);
+            max-width: 1100px;
+            margin: 32px auto 55px;
+        }
+
+        .xyz-breadcrumb {
+            margin-bottom: 20px;
+            color: var(--gris);
+            font-size: 13px;
+        }
+
+        .xyz-breadcrumb a {
+            color: var(--vino);
+            font-weight: 700;
+        }
+
+        .xyz-heading {
+            margin-bottom: 24px;
+        }
+
+        .xyz-heading h1 {
+            color: var(--vino);
+            font-size: 28px;
+            margin: 0 0 6px;
+        }
+
+        .xyz-heading p {
+            color: var(--gris);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        /* PANEL DEL USUARIO */
+
+        .xyz-user-panel {
+            width: 100%;
+            background: #FFFFFF;
+            border: 1px solid var(--borde);
+            border-radius: 14px;
+            overflow: hidden;
+            margin-bottom: 24px;
+            box-shadow: 0 5px 20px rgba(55,25,30,.05);
+        }
+
+        .xyz-user-top {
+            background: var(--vino-oscuro);
+            padding: 22px 28px;
+            border-bottom: 4px solid var(--oro);
+        }
+
+        .xyz-user-top h2 {
+            font-size: 19px;
+            color: #FFFFFF;
+            margin: 0;
+        }
+
+        .xyz-user-top p {
+            font-size: 13px;
+            color: #F4E8C5;
+            margin: 5px 0 0;
+        }
+
+        .xyz-user-content {
+            padding: 26px 28px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            min-width: 0;
+        }
+
+        .xyz-avatar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 65px;
+            height: 65px;
+            min-width: 65px;
+            background: #F4E8C5;
+            border-radius: 13px;
+            color: var(--vino);
+        }
+
+        .xyz-avatar svg {
+            width: 34px;
+            height: 34px;
+        }
+
+        .xyz-user-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .xyz-user-label {
+            display: block;
+            font-size: 12px;
+            color: var(--gris);
+            margin-bottom: 5px;
+        }
+
+        .xyz-username {
+            display: block;
+            color: var(--vino);
+            font-size: 22px;
+            font-weight: 750;
+            overflow-wrap: anywhere;
+        }
+
+        .xyz-user-subtitle {
+            display: block;
+            color: var(--gris);
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        /* ROLES */
+
+        .xyz-roles-section {
+            width: 100%;
+            background: #FFFFFF;
+            border: 1px solid var(--borde);
+            border-radius: 14px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 5px 20px rgba(55,25,30,.05);
+        }
+
+        .xyz-roles-heading {
+            margin-bottom: 22px;
+        }
+
+        .xyz-roles-heading h2 {
+            color: var(--vino);
+            font-size: 20px;
+            margin: 0 0 6px;
+        }
+
+        .xyz-roles-heading p {
+            margin: 0;
+            color: var(--gris);
+            font-size: 13px;
+        }
+
+        .xyz-roles-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            width: 100%;
+        }
+
+        .xyz-role {
+            min-width: 0;
+            background: #FDFBF9;
+            border: 1px solid var(--borde);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .xyz-role h3 {
+            color: var(--vino);
+            font-size: 17px;
+            margin: 0 0 10px;
+        }
+
+        .xyz-role p {
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--gris);
+            margin: 0 0 20px;
+            min-height: 64px;
+        }
+
+        .xyz-role-status {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .xyz-assigned {
+            background: #E4F5EB;
+            color: #206C43;
+        }
+
+        .xyz-unassigned {
+            background: #F0EDED;
+            color: #746C70;
+        }
+
+        /* AVISO */
+
+        .xyz-security {
+            background: #FBF6E8;
+            border: 1px solid #EBDDAD;
+            border-left: 4px solid var(--oro);
+            border-radius: 8px;
+            padding: 17px 20px;
+            margin-top: 24px;
+        }
+
+        .xyz-security strong {
+            display: block;
+            color: var(--vino);
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .xyz-security p {
+            color: #65563B;
+            font-size: 13px;
+            line-height: 1.65;
+            margin: 0;
+        }
+
+        /* ENLACES */
+
+        .xyz-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .xyz-links a {
+            padding: 11px 16px;
+            background: #FFFFFF;
+            border: 1px solid #D9C6C9;
+            border-radius: 8px;
+            color: var(--vino);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .xyz-links a:hover {
+            border-color: var(--vino);
+            background: #FBF5F6;
+        }
+
+        .xyz-footer {
+            background: #FFFFFF;
+            border-top: 1px solid var(--borde);
+            padding: 23px 15px;
+            text-align: center;
+            color: var(--gris);
+            font-size: 12px;
+        }
+
+        .xyz-footer strong {
+            color: var(--vino);
+        }
+
+        /* TABLETS */
+
+        @media (max-width: 850px) {
+            .xyz-roles-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        /* CELULARES */
+
+        @media (max-width: 650px) {
+            .xyz-header-inner {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 12px 16px;
+            }
+
+            .xyz-logo {
+                width: 65px;
+                height: 65px;
+            }
+
+            .xyz-brand-name {
+                font-size: 14px;
+            }
+
+            .xyz-account {
+                justify-content: space-between;
+                border-top: 1px solid var(--borde);
+                padding-top: 12px;
+            }
+
+            .xyz-account-label {
+                text-align: left;
+            }
+
+            .xyz-menu-inner {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+
+            .xyz-menu-inner a {
+                font-size: 12px;
+                padding: 13px 12px;
+            }
+
+            .xyz-main {
+                width: calc(100% - 28px);
+                margin-top: 24px;
+            }
+
+            .xyz-heading h1 {
+                font-size: 24px;
+            }
+
+            .xyz-user-top {
+                padding: 20px;
+            }
+
+            .xyz-user-content {
+                padding: 20px;
+            }
+
+            .xyz-username {
+                font-size: 19px;
+            }
+
+            .xyz-roles-section {
+                padding: 20px;
+            }
+
+            .xyz-roles-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .xyz-role p {
+                min-height: 0;
+            }
+
+            .xyz-links {
+                flex-direction: column;
+            }
+
+            .xyz-links a {
+                text-align: center;
+            }
+        }
+    </style>
+</h:head>
+
+<h:body>
+
+    <div class="xyz-top"></div>
+
+    <!-- ENCABEZADO -->
+    <header class="xyz-header">
+        <div class="xyz-header-inner">
+
+            <div class="xyz-brand">
+                <img
+                        src="#{facesContext.externalContext.requestContextPath}/resources/img/logo-universidad-xyz.png"
+                        class="xyz-logo"
+                        alt="Universidad Tecnológica XYZ"/>
+
+                <div>
+                    <div class="xyz-brand-name">
+                        Universidad Tecnológica XYZ
+                    </div>
+                    <div class="xyz-brand-description">
+                        Sistema de Gestión Bibliotecaria
+                    </div>
+                </div>
+            </div>
+
+            <div class="xyz-account">
+                <div class="xyz-account-label">
+                    Sesión iniciada como
+                    <strong class="xyz-account-name">
+                        <h:outputText
+                                value="#{loginBean.usuarioAutenticado}"/>
+                    </strong>
+                </div>
+
+                <h:form id="formSalir">
+                    <h:commandButton
+                            value="Cerrar sesión"
+                            action="#{loginBean.cerrarSesion}"
+                            styleClass="xyz-logout"/>
+                </h:form>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- NAVEGACIÓN -->
+    <nav class="xyz-menu">
+        <div class="xyz-menu-inner">
+
+            <h:link outcome="/index.xhtml"
+                    value="Inicio"/>
+
+            <h:panelGroup
+                    rendered="#{loginBean.tieneRol('ADMINISTRADOR') or loginBean.tieneRol('BIBLIOTECARIO')}">
+
+                <h:link outcome="/libros.xhtml"
+                        value="Libros"/>
+
+                <h:link outcome="/ejemplares.xhtml"
+                        value="Ejemplares"/>
+
+                <h:link outcome="/prestamos.xhtml"
+                        value="Préstamos"/>
+
+                <h:link outcome="/devoluciones.xhtml"
+                        value="Devoluciones"/>
+
+                <h:link outcome="/reportes.xhtml"
+                        value="Reportes"/>
+
+            </h:panelGroup>
+
+            <h:panelGroup
+                    rendered="#{loginBean.tieneRol('ADMINISTRADOR')}">
+
+                <h:link outcome="/usuarios.xhtml"
+                        value="Usuarios"/>
+
+            </h:panelGroup>
+
+            <h:link outcome="/mis-roles.xhtml"
+                    value="Mi perfil"
+                    styleClass="xyz-selected"/>
+
+        </div>
+    </nav>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="xyz-main">
+
+        <div class="xyz-breadcrumb">
+            <h:link outcome="/index.xhtml"
+                    value="Inicio"/>
+            / Mi perfil
+        </div>
+
+        <div class="xyz-heading">
+            <h1>Mi perfil y permisos</h1>
+            <p>
+                Información de la cuenta institucional
+                y los roles asignados mediante LDAP.
+            </p>
+        </div>
+
+        <!-- PERFIL DEL USUARIO -->
+        <section class="xyz-user-panel">
+
+            <div class="xyz-user-top">
+                <h2>Información de mi cuenta</h2>
+                <p>
+                    Datos de la sesión institucional activa
+                </p>
+            </div>
+
+            <div class="xyz-user-content">
+
+                <div class="xyz-avatar">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="1.8"
+                         stroke-linecap="round"
+                         stroke-linejoin="round"
+                         aria-hidden="true">
+                        <circle cx="12" cy="8" r="4"/>
+                        <path d="M4 21v-2a8 8 0 0 1 16 0v2"/>
+                    </svg>
+                </div>
+
+                <div class="xyz-user-details">
+
+                    <span class="xyz-user-label">
+                        Usuario autenticado
+                    </span>
+
+                    <strong class="xyz-username">
+                        <h:outputText
+                                value="#{loginBean.usuarioAutenticado}"/>
+                    </strong>
+
+                    <span class="xyz-user-subtitle">
+                        Universidad Tecnológica XYZ
+                    </span>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ROLES LDAP -->
+        <section class="xyz-roles-section">
+
+            <div class="xyz-roles-heading">
+                <h2>Roles del usuario autenticado</h2>
+                <p>
+                    Permisos asociados a la cuenta institucional.
+                </p>
+            </div>
+
+            <div class="xyz-roles-grid">
+
+                <!-- ADMINISTRADOR -->
+                <div class="xyz-role">
+                    <h3>Administrador</h3>
+
+                    <p>
+                        Gestión administrativa y acceso
+                        al módulo de usuarios.
+                    </p>
+
+                    <h:outputText
+                            value="#{loginBean.tieneRol('ADMINISTRADOR') ? 'Asignado' : 'No asignado'}"
+                            styleClass="#{loginBean.tieneRol('ADMINISTRADOR') ? 'xyz-role-status xyz-assigned' : 'xyz-role-status xyz-unassigned'}"/>
+                </div>
+
+                <!-- BIBLIOTECARIO -->
+                <div class="xyz-role">
+                    <h3>Bibliotecario</h3>
+
+                    <p>
+                        Gestión de libros, ejemplares,
+                        préstamos y devoluciones.
+                    </p>
+
+                    <h:outputText
+                            value="#{loginBean.tieneRol('BIBLIOTECARIO') ? 'Asignado' : 'No asignado'}"
+                            styleClass="#{loginBean.tieneRol('BIBLIOTECARIO') ? 'xyz-role-status xyz-assigned' : 'xyz-role-status xyz-unassigned'}"/>
+                </div>
+
+                <!-- ESTUDIANTE -->
+                <div class="xyz-role">
+                    <h3>Estudiante</h3>
+
+                    <p>
+                        Consulta del catálogo bibliográfico
+                        según los permisos establecidos.
+                    </p>
+
+                    <h:outputText
+                            value="#{loginBean.tieneRol('ESTUDIANTE') ? 'Asignado' : 'No asignado'}"
+                            styleClass="#{loginBean.tieneRol('ESTUDIANTE') ? 'xyz-role-status xyz-assigned' : 'xyz-role-status xyz-unassigned'}"/>
+                </div>
+
+            </div>
+
+            <div class="xyz-security">
+                <strong>Seguridad institucional</strong>
+                <p>
+                    Los roles se obtienen del directorio LDAP.
+                    Esta pantalla es informativa y no modifica
+                    los permisos del usuario.
+                </p>
+            </div>
+
+        </section>
+
+        <!-- ACCESOS RÁPIDOS -->
+        <nav class="xyz-links"
+             aria-label="Accesos relacionados">
+
+            <h:link outcome="/index.xhtml"
+                    value="Volver al inicio"/>
+
+            <h:panelGroup
+                    rendered="#{loginBean.tieneRol('ADMINISTRADOR') or loginBean.tieneRol('BIBLIOTECARIO')}">
+
+                <h:link outcome="/prestamos.xhtml"
+                        value="Consultar préstamos"/>
+
+            </h:panelGroup>
+
+            <h:panelGroup
+                    rendered="#{loginBean.tieneRol('ADMINISTRADOR')}">
+
+                <h:link outcome="/usuarios.xhtml"
+                        value="Administrar usuarios"/>
+
+            </h:panelGroup>
+
+        </nav>
+
+    </main>
+
+    <footer class="xyz-footer">
+        <strong>Biblioteca de la Universidad Tecnológica XYZ</strong>
+        | Sistema de Gestión Bibliotecaria
+    </footer>
+
+</h:body>
+</html>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence
+        xmlns="https://jakarta.ee/xml/ns/persistence"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        https://jakarta.ee/xml/ns/persistence
+        https://jakarta.ee/xml/ns/persistence/persistence_3_1.xsd"
+        version="3.1">
+
+    <persistence-unit
+            name="BiblioNovaPU"
+            transaction-type="JTA">
+
+        <jta-data-source>java:jboss/datasources/BiblioNovaDS</jta-data-source>
+
+        <shared-cache-mode>ENABLE_SELECTIVE</shared-cache-mode>
+
+        <properties>
+            <property
+                    name="hibernate.hbm2ddl.auto"
+                    value="validate"/>
+
+            <property
+                    name="hibernate.show_sql"
+                    value="true"/>
+
+            <property
+                    name="hibernate.format_sql"
+                    value="true"/>
+
+            <property name="hibernate.dialect"
+                      value="org.hibernate.dialect.MariaDBDialect"/>
+
+            <!-- Activar caché de segundo nivel -->
+            <property name="hibernate.cache.use_second_level_cache"
+                      value="true"/>
+
+            <!-- Habilitar estadísticas para comprobar la caché -->
+            <property name="hibernate.generate_statistics"
+                      value="true"/>
+
+        </properties>
+
+    </persistence-unit>
+</persistence>
